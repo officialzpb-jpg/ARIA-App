@@ -1,0 +1,2618 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#000000">
+    <title>ARIA</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ============================================
+           ARIA MOBILE - PREMIUM UI v2.0
+           Top App Store Quality Design
+           ============================================ */
+        
+        :root {
+            /* Safe Areas */
+            --safe-top: env(safe-area-inset-top, 0px);
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+            --safe-left: env(safe-area-inset-left, 0px);
+            --safe-right: env(safe-area-inset-right, 0px);
+            
+            /* OLED Black Theme */
+            --bg-primary: #000000;
+            --bg-secondary: rgba(28, 28, 30, 0.85);
+            --bg-tertiary: rgba(44, 44, 46, 0.7);
+            --bg-elevated: rgba(58, 58, 60, 0.6);
+            --bg-card: rgba(28, 28, 30, 0.6);
+            
+            /* Premium Accent - Electric Cyan */
+            --accent-primary: #00f5d4;
+            --accent-secondary: #00c9a7;
+            --accent-glow: rgba(0, 245, 212, 0.4);
+            --accent-gradient: linear-gradient(135deg, #00f5d4 0%, #00c9a7 50%, #00a8cc 100%);
+            --accent-rainbow: linear-gradient(90deg, #00f5d4, #00c9a7, #00a8cc, #00f5d4);
+            
+            /* Text Colors */
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.7);
+            --text-tertiary: rgba(255, 255, 255, 0.5);
+            --text-muted: rgba(255, 255, 255, 0.35);
+            
+            /* Semantic Colors */
+            --success: #30d158;
+            --error: #ff453a;
+            --warning: #ff9f0a;
+            --info: #0a84ff;
+            
+            /* Glass Effects */
+            --glass-bg: rgba(28, 28, 30, 0.72);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-highlight: rgba(255, 255, 255, 0.05);
+            
+            /* Shadows */
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.5);
+            --shadow-glow: 0 0 40px var(--accent-glow);
+            
+            /* Spacing */
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            
+            /* Border Radius */
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 20px;
+            --radius-xl: 28px;
+            --radius-full: 9999px;
+            
+            /* Transitions */
+            --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-base: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-spring: 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            --transition-bounce: 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        /* Reset & Base */
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+        }
+
+        html {
+            height: 100%;
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            overflow: hidden;
+        }
+
+        body {
+            height: 100%;
+            background: var(--bg-primary);
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+            overscroll-behavior: none;
+        }
+
+        /* ============================================
+           ANIMATIONS
+           ============================================ */
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInUp {
+            from { 
+                opacity: 0; 
+                transform: translateY(20px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
+
+        @keyframes fadeInScale {
+            from { 
+                opacity: 0; 
+                transform: scale(0.95); 
+            }
+            to { 
+                opacity: 1; 
+                transform: scale(1); 
+            }
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-100%); }
+            to { transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { 
+                transform: scale(1); 
+                opacity: 1;
+            }
+            50% { 
+                transform: scale(1.05); 
+                opacity: 0.8;
+            }
+        }
+
+        @keyframes pulse-ring {
+            0% { 
+                transform: scale(1); 
+                opacity: 0.8;
+            }
+            100% { 
+                transform: scale(1.5); 
+                opacity: 0;
+            }
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+        }
+
+        @keyframes wave {
+            0%, 100% { height: 20%; }
+            50% { height: 100%; }
+        }
+
+        @keyframes sound-wave {
+            0%, 100% { 
+                transform: scaleY(0.3);
+                opacity: 0.5;
+            }
+            50% { 
+                transform: scaleY(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+            20%, 40%, 60%, 80% { transform: translateX(4px); }
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 20px var(--accent-glow); }
+            50% { box-shadow: 0 0 40px var(--accent-glow), 0 0 60px var(--accent-glow); }
+        }
+
+        @keyframes gradient-shift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes typing {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        @keyframes liquid {
+            0%, 100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+            50% { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
+        }
+
+        /* ============================================
+           APP CONTAINER
+           ============================================ */
+        
+        .app {
+            height: 100vh;
+            height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* ============================================
+           DYNAMIC ISLAND / NOTIFICATION BAR
+           ============================================ */
+        
+        .dynamic-island {
+            position: fixed;
+            top: max(12px, var(--safe-top));
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            background: var(--bg-secondary);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 1000;
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: var(--shadow-lg);
+            min-width: 200px;
+            max-width: 90vw;
+        }
+
+        .dynamic-island.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .dynamic-island.expanded {
+            min-width: 320px;
+            padding: 16px 24px;
+        }
+
+        .island-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: var(--accent-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            animation: pulse 2s infinite;
+        }
+
+        .island-icon.success { background: var(--success); }
+        .island-icon.error { background: var(--error); }
+        .island-icon.warning { background: var(--warning); }
+
+        .island-content {
+            flex: 1;
+        }
+
+        .island-title {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .island-subtitle {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        /* ============================================
+           HEADER - GLASSMORPHISM 2.0
+           ============================================ */
+        
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            padding: max(12px, var(--safe-top)) 20px 12px;
+            background: linear-gradient(180deg, 
+                rgba(0, 0, 0, 0.95) 0%, 
+                rgba(0, 0, 0, 0.8) 60%,
+                rgba(0, 0, 0, 0) 100%);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-title {
+            font-size: 32px;
+            font-weight: 800;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.5px;
+        }
+
+        .header-subtitle {
+            font-size: 13px;
+            color: var(--text-tertiary);
+            margin-top: 2px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .header-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: var(--transition-fast);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, var(--glass-highlight), transparent);
+            opacity: 0;
+            transition: var(--transition-fast);
+        }
+
+        .header-btn:active {
+            transform: scale(0.92);
+        }
+
+        .header-btn:active::before {
+            opacity: 1;
+        }
+
+        .header-btn .badge {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            width: 18px;
+            height: 18px;
+            background: var(--error);
+            border-radius: 50%;
+            font-size: 10px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: pulse 2s infinite;
+        }
+
+        /* ============================================
+           CONTENT AREA WITH PULL TO REFRESH
+           ============================================ */
+        
+        .content-wrapper {
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .content {
+            height: 100%;
+            overflow-y: auto;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+            padding: 0 16px calc(100px + var(--safe-bottom));
+            scroll-behavior: smooth;
+        }
+
+        .content::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Pull to Refresh */
+        .pull-refresh {
+            position: absolute;
+            top: -60px;
+            left: 0;
+            right: 0;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .pull-refresh.visible {
+            opacity: 1;
+        }
+
+        .pull-refresh-spinner {
+            width: 36px;
+            height: 36px;
+            border: 3px solid var(--glass-border);
+            border-top-color: var(--accent-primary);
+            border-radius: 50%;
+            animation: rotate 0.8s linear infinite;
+        }
+
+        /* ============================================
+           HERO SECTION - VOICE INTERFACE
+           ============================================ */
+        
+        .hero-section {
+            padding: 20px 0 32px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        /* Liquid Morphing Record Button */
+        .record-container {
+            position: relative;
+            width: 180px;
+            height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .record-btn {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            background: var(--accent-gradient);
+            border: none;
+            color: var(--bg-primary);
+            font-size: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 2;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 
+                0 8px 32px rgba(0, 245, 212, 0.3),
+                0 0 0 1px rgba(255, 255, 255, 0.1) inset,
+                0 0 60px var(--accent-glow);
+            animation: liquid 8s ease-in-out infinite;
+        }
+
+        .record-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background: linear-gradient(135deg, rgba(255,255,255,0.3), transparent);
+            opacity: 0.5;
+        }
+
+        .record-btn:active {
+            transform: scale(0.95);
+        }
+
+        .record-btn.recording {
+            background: var(--error);
+            animation: liquid 2s ease-in-out infinite, glow 1.5s ease-in-out infinite;
+            box-shadow: 
+                0 8px 32px rgba(255, 69, 58, 0.4),
+                0 0 60px rgba(255, 69, 58, 0.3);
+        }
+
+        /* Pulse Rings */
+        .pulse-ring {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 2px solid var(--accent-primary);
+            opacity: 0;
+            animation: pulse-ring 2s ease-out infinite;
+        }
+
+        .pulse-ring:nth-child(2) { animation-delay: 0.5s; }
+        .pulse-ring:nth-child(3) { animation-delay: 1s; }
+
+        .record-btn.recording ~ .pulse-ring {
+            border-color: var(--error);
+        }
+
+        /* Sound Wave Visualization */
+        .sound-wave {
+            position: absolute;
+            bottom: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            height: 40px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .sound-wave.active {
+            opacity: 1;
+        }
+
+        .wave-bar {
+            width: 4px;
+            height: 100%;
+            background: var(--accent-gradient);
+            border-radius: 2px;
+            animation: sound-wave 0.8s ease-in-out infinite;
+            transform-origin: center;
+        }
+
+        .wave-bar:nth-child(1) { animation-delay: 0s; height: 30%; }
+        .wave-bar:nth-child(2) { animation-delay: 0.1s; height: 60%; }
+        .wave-bar:nth-child(3) { animation-delay: 0.2s; height: 100%; }
+        .wave-bar:nth-child(4) { animation-delay: 0.3s; height: 70%; }
+        .wave-bar:nth-child(5) { animation-delay: 0.4s; height: 50%; }
+
+        .record-btn.recording ~ .sound-wave .wave-bar {
+            background: linear-gradient(180deg, var(--error), #ff6b6b);
+        }
+
+        .record-status {
+            margin-top: 24px;
+            font-size: 15px;
+            color: var(--text-secondary);
+            font-weight: 500;
+            transition: var(--transition-base);
+        }
+
+        .record-status.listening {
+            color: var(--error);
+            font-weight: 600;
+        }
+
+        /* ============================================
+           CARDS - GLASSMORPHISM
+           ============================================ */
+        
+        .card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-xl);
+            padding: 20px;
+            margin-bottom: 16px;
+            position: relative;
+            overflow: hidden;
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--glass-highlight), transparent);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-title-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 10px;
+            background: var(--accent-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .card-badge {
+            padding: 6px 12px;
+            background: rgba(0, 245, 212, 0.15);
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--accent-primary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .card-badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background: var(--accent-primary);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        /* ============================================
+           PERSONA SELECTOR - HORIZONTAL SCROLL
+           ============================================ */
+        
+        .persona-section {
+            margin-bottom: 20px;
+        }
+
+        .section-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+            padding: 0 4px;
+        }
+
+        .persona-scroll {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding: 4px;
+            margin: -4px;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .persona-scroll::-webkit-scrollbar {
+            display: none;
+        }
+
+        .persona-chip {
+            flex-shrink: 0;
+            padding: 12px 20px;
+            background: var(--bg-tertiary);
+            border: 1.5px solid transparent;
+            border-radius: var(--radius-lg);
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 600;
+            white-space: nowrap;
+            transition: var(--transition-fast);
+            scroll-snap-align: start;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .persona-chip:active {
+            transform: scale(0.96);
+        }
+
+        .persona-chip.active {
+            background: rgba(0, 245, 212, 0.15);
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+            box-shadow: 0 0 20px rgba(0, 245, 212, 0.2);
+        }
+
+        .persona-avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--accent-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        /* ============================================
+           STATS GRID - BENTO BOX STYLE
+           ============================================ */
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+            transition: var(--transition-fast);
+        }
+
+        .stat-card:active {
+            transform: scale(0.98);
+        }
+
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--accent-gradient);
+            opacity: 0.5;
+        }
+
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: rgba(0, 245, 212, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            margin-bottom: 12px;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 800;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: var(--text-tertiary);
+            margin-top: 6px;
+            font-weight: 500;
+        }
+
+        .stat-trend {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            padding: 4px 8px;
+            background: rgba(48, 209, 88, 0.15);
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--success);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* ============================================
+           QUICK ACTIONS - GRID
+           ============================================ */
+        
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .quick-action {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            padding: 16px 8px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            color: var(--text-primary);
+            transition: var(--transition-fast);
+        }
+
+        .quick-action:active {
+            transform: scale(0.95);
+            background: var(--bg-tertiary);
+        }
+
+        .quick-action-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            background: var(--accent-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            box-shadow: 0 4px 16px rgba(0, 245, 212, 0.3);
+        }
+
+        .quick-action-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        /* ============================================
+           ACTIVITY FEED
+           ============================================ */
+        
+        .activity-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            padding: 14px;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-lg);
+            transition: var(--transition-fast);
+            animation: fadeInUp 0.4s ease-out;
+            animation-fill-mode: both;
+        }
+
+        .activity-item:nth-child(1) { animation-delay: 0.05s; }
+        .activity-item:nth-child(2) { animation-delay: 0.1s; }
+        .activity-item:nth-child(3) { animation-delay: 0.15s; }
+        .activity-item:nth-child(4) { animation-delay: 0.2s; }
+
+        .activity-item:active {
+            transform: scale(0.98);
+            background: var(--bg-elevated);
+        }
+
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .activity-icon.success { 
+            background: rgba(48, 209, 88, 0.15); 
+            color: var(--success); 
+        }
+        .activity-icon.error { 
+            background: rgba(255, 69, 58, 0.15); 
+            color: var(--error); 
+        }
+        .activity-icon.info { 
+            background: rgba(10, 132, 255, 0.15); 
+            color: var(--info); 
+        }
+        .activity-icon.warning { 
+            background: rgba(255, 159, 10, 0.15); 
+            color: var(--warning); 
+        }
+
+        .activity-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .activity-text {
+            font-size: 14px;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        .activity-time {
+            font-size: 12px;
+            color: var(--text-tertiary);
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .activity-time::before {
+            content: '';
+            width: 4px;
+            height: 4px;
+            background: var(--text-muted);
+            border-radius: 50%;
+        }
+
+        /* ============================================
+           USAGE BARS
+           ============================================ */
+        
+        .usage-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .usage-item {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .usage-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .usage-label {
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .usage-value {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--accent-primary);
+        }
+
+        .usage-bar {
+            height: 8px;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .usage-fill {
+            height: 100%;
+            border-radius: 4px;
+            background: var(--accent-gradient);
+            background-size: 200% 200%;
+            animation: gradient-shift 3s ease infinite;
+            transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+        }
+
+        .usage-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        /* ============================================
+           BOTTOM NAVIGATION - FLOATING TAB BAR
+           ============================================ */
+        
+        .bottom-nav {
+            position: fixed;
+            bottom: max(16px, var(--safe-bottom));
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(28, 28, 30, 0.85);
+            backdrop-filter: blur(30px) saturate(180%);
+            -webkit-backdrop-filter: blur(30px) saturate(180%);
+            border: 1px solid var(--glass-border);
+            border-radius: 28px;
+            padding: 8px;
+            display: flex;
+            gap: 4px;
+            z-index: 100;
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.4),
+                0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            padding: 10px 16px;
+            background: none;
+            border: none;
+            border-radius: 20px;
+            color: var(--text-tertiary);
+            font-size: 10px;
+            font-weight: 600;
+            transition: var(--transition-fast);
+            position: relative;
+            min-width: 56px;
+        }
+
+        .nav-item:active {
+            transform: scale(0.92);
+        }
+
+        .nav-item.active {
+            background: rgba(0, 245, 212, 0.15);
+            color: var(--accent-primary);
+        }
+
+        .nav-item.active .nav-icon {
+            transform: translateY(-2px);
+        }
+
+        .nav-icon {
+            font-size: 22px;
+            transition: var(--transition-fast);
+        }
+
+        /* Active Indicator Dot */
+        .nav-item.active::after {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            width: 4px;
+            height: 4px;
+            background: var(--accent-primary);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        /* ============================================
+           TAB CONTENT
+           ============================================ */
+        
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* ============================================
+           MODALS - BOTTOM SHEETS
+           ============================================ */
+        
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            z-index: 500;
+            display: none;
+            align-items: flex-end;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .bottom-sheet {
+            width: 100%;
+            background: var(--bg-secondary);
+            border-radius: 32px 32px 0 0;
+            max-height: 90vh;
+            overflow: hidden;
+            transform: translateY(100%);
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-overlay.active .bottom-sheet {
+            transform: translateY(0);
+        }
+
+        .sheet-handle {
+            width: 36px;
+            height: 4px;
+            background: var(--text-muted);
+            border-radius: 2px;
+            margin: 12px auto;
+        }
+
+        .sheet-header {
+            padding: 8px 24px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sheet-title {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .sheet-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--bg-tertiary);
+            border: none;
+            color: var(--text-primary);
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sheet-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0 24px 24px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* ============================================
+           FORM ELEMENTS
+           ============================================ */
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-input, .form-select {
+            width: 100%;
+            padding: 16px 18px;
+            background: var(--bg-tertiary);
+            border: 1.5px solid transparent;
+            border-radius: var(--radius-lg);
+            color: var(--text-primary);
+            font-size: 16px;
+            font-weight: 500;
+            transition: var(--transition-fast);
+        }
+
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            background: var(--bg-elevated);
+            box-shadow: 0 0 0 4px rgba(0, 245, 212, 0.1);
+        }
+
+        .form-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        /* ============================================
+           BUTTONS
+           ============================================ */
+        
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 16px 24px;
+            border-radius: var(--radius-lg);
+            font-size: 16px;
+            font-weight: 700;
+            border: none;
+            transition: var(--transition-fast);
+            cursor: pointer;
+        }
+
+        .btn:active {
+            transform: scale(0.97);
+        }
+
+        .btn-primary {
+            background: var(--accent-gradient);
+            color: var(--bg-primary);
+            box-shadow: 0 4px 20px rgba(0, 245, 212, 0.3);
+        }
+
+        .btn-primary:active {
+            box-shadow: 0 2px 10px rgba(0, 245, 212, 0.2);
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .btn-full {
+            width: 100%;
+        }
+
+        /* ============================================
+           LIST ITEMS - SWIPEABLE
+           ============================================ */
+        
+        .list-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 16px;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-lg);
+            margin-bottom: 10px;
+            transition: var(--transition-fast);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .list-item:active {
+            transform: scale(0.98);
+            background: var(--bg-elevated);
+        }
+
+        .list-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: var(--accent-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .list-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .list-title {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .list-subtitle {
+            font-size: 13px;
+            color: var(--text-tertiary);
+        }
+
+        .list-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .list-badge {
+            padding: 4px 10px;
+            background: rgba(0, 245, 212, 0.15);
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--accent-primary);
+        }
+
+        .list-action {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: rgba(255, 69, 58, 0.15);
+            border: none;
+            color: var(--error);
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* ============================================
+           TOGGLE SWITCH
+           ============================================ */
+        
+        .toggle-switch {
+            width: 52px;
+            height: 30px;
+            background: var(--bg-elevated);
+            border-radius: 15px;
+            position: relative;
+            cursor: pointer;
+            transition: var(--transition-base);
+        }
+
+        .toggle-switch.active {
+            background: var(--accent-primary);
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 26px;
+            height: 26px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: var(--transition-spring);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .toggle-switch.active::after {
+            transform: translateX(22px);
+        }
+
+        /* ============================================
+           EMPTY STATE
+           ============================================ */
+        
+        .empty-state {
+            text-align: center;
+            padding: 48px 24px;
+            color: var(--text-tertiary);
+        }
+
+        .empty-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 24px;
+            background: var(--bg-tertiary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            margin: 0 auto 20px;
+            opacity: 0.5;
+        }
+
+        .empty-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        /* ============================================
+           LOGIN SCREEN
+           ============================================ */
+        
+        .login-screen {
+            position: fixed;
+            inset: 0;
+            background: var(--bg-primary);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            padding: max(40px, var(--safe-top)) 28px max(28px, var(--safe-bottom));
+            overflow-y: auto;
+        }
+
+        .login-logo {
+            text-align: center;
+            margin: 40px 0 48px;
+        }
+
+        .login-logo-icon {
+            width: 100px;
+            height: 100px;
+            border-radius: 28px;
+            background: var(--accent-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            margin: 0 auto 20px;
+            box-shadow: 
+                0 8px 32px rgba(0, 245, 212, 0.3),
+                0 0 60px var(--accent-glow);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .login-logo-text {
+            font-size: 36px;
+            font-weight: 800;
+        }
+
+        .login-logo-text span {
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .login-subtitle {
+            font-size: 15px;
+            color: var(--text-tertiary);
+            margin-top: 8px;
+        }
+
+        /* ============================================
+           SKELETON LOADING
+           ============================================ */
+        
+        .skeleton {
+            background: linear-gradient(
+                90deg,
+                var(--bg-tertiary) 25%,
+                var(--bg-elevated) 50%,
+                var(--bg-tertiary) 75%
+            );
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: var(--radius-md);
+        }
+
+        /* ============================================
+           FLOATING ACTION BUTTON MENU
+           ============================================ */
+        
+        .fab-menu {
+            position: fixed;
+            bottom: 100px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 90;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(20px);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .fab-menu.open {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .fab-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-direction: row-reverse;
+        }
+
+        .fab-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            color: var(--text-primary);
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-md);
+        }
+
+        .fab-label {
+            padding: 8px 14px;
+            background: var(--glass-bg);
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .fab-main {
+            position: fixed;
+            bottom: max(90px, calc(var(--safe-bottom) + 74px));
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--accent-gradient);
+            border: none;
+            color: var(--bg-primary);
+            font-size: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 95;
+            box-shadow: 
+                0 4px 20px rgba(0, 245, 212, 0.4),
+                0 0 40px var(--accent-glow);
+            transition: var(--transition-fast);
+        }
+
+        .fab-main:active {
+            transform: scale(0.92);
+        }
+
+        .fab-main.open {
+            transform: rotate(45deg);
+        }
+
+        /* ============================================
+           CONVERSATION ITEM
+           ============================================ */
+        
+        .conversation-item {
+            display: flex;
+            gap: 14px;
+            padding: 16px;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-lg);
+            margin-bottom: 12px;
+            transition: var(--transition-fast);
+        }
+
+        .conversation-item:active {
+            transform: scale(0.98);
+            background: var(--bg-elevated);
+        }
+
+        .conversation-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            background: var(--accent-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            flex-shrink: 0;
+        }
+
+        .conversation-body {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .conversation-query {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .conversation-response {
+            font-size: 13px;
+            color: var(--text-tertiary);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            line-height: 1.4;
+        }
+
+        .conversation-meta {
+            display: flex;
+            gap: 12px;
+            margin-top: 10px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .conversation-tag {
+            padding: 3px 10px;
+            background: rgba(0, 245, 212, 0.1);
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--accent-primary);
+        }
+
+        /* ============================================
+           TYPING INDICATOR
+           ============================================ */
+        
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 12px 16px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--accent-primary);
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        /* ============================================
+           RESPONSIVE ADJUSTMENTS
+           ============================================ */
+        
+        @media (min-width: 390px) {
+            .stats-grid {
+                gap: 14px;
+            }
+            
+            .quick-actions {
+                gap: 14px;
+            }
+        }
+
+        /* Reduced Motion */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Dynamic Island Notifications -->
+    <div class="dynamic-island" id="dynamicIsland">
+        <div class="island-icon" id="islandIcon">&#10003;</div>
+        <div class="island-content">
+            <div class="island-title" id="islandTitle">Notification</div>
+            <div class="island-subtitle" id="islandSubtitle">Details here</div>
+        </div>
+    </div>
+
+    <!-- Login Screen -->
+    <div class="login-screen" id="loginScreen">
+        <div class="login-logo">
+            <div class="login-logo-icon">&#9672;</div>
+            <div class="login-logo-text"><span>ARIA</span></div>
+            <div class="login-subtitle">AI Voice Assistant</div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Email</label>
+            <input type="email" class="form-input" id="loginEmail" placeholder="you@example.com" value="test@example.com">
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Password</label>
+            <input type="password" class="form-input" id="loginPassword" placeholder="Your password" value="password123">
+        </div>
+
+        <button class="btn btn-primary btn-full" onclick="login()" style="margin-top: 8px;">
+            Sign In
+        </button>
+
+        <div style="text-align: center; margin-top: 20px; color: var(--text-tertiary); font-size: 13px;">
+            Use test@example.com / password123
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div class="app" id="mainApp" style="display: none;">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div>
+                    <div class="header-title">ARIA</div>
+                    <div class="header-subtitle" id="greeting">Good evening</div>
+                </div>
+                <div class="header-actions">
+                    <button class="header-btn" onclick="refreshData()" data-tooltip="Refresh">
+                        &#8635;
+                    </button>
+                    <button class="header-btn" onclick="showNotifications()" data-tooltip="Notifications">
+                        &#128276;
+                        <span class="badge" id="notifBadge">3</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Content -->
+        <div class="content-wrapper">
+            <div class="content" id="mainContent">
+                <!-- Pull to Refresh -->
+                <div class="pull-refresh" id="pullRefresh">
+                    <div class="pull-refresh-spinner"></div>
+                </div>
+
+                <!-- HOME TAB -->
+                <div class="tab-content active" id="tab-home">
+                    <!-- Hero / Voice Section -->
+                    <section class="hero-section">
+                        <div class="record-container">
+                            <button class="record-btn" id="recordBtn" onclick="toggleRecording()">
+                                &#127908;
+                            </button>
+                            <div class="pulse-ring"></div>
+                            <div class="pulse-ring"></div>
+                            <div class="pulse-ring"></div>
+                            <div class="sound-wave" id="soundWave">
+                                <div class="wave-bar"></div>
+                                <div class="wave-bar"></div>
+                                <div class="wave-bar"></div>
+                                <div class="wave-bar"></div>
+                                <div class="wave-bar"></div>
+                            </div>
+                        </div>
+                        <div class="record-status" id="recordStatus">Tap to speak with ARIA</div>
+                    </section>
+
+                    <!-- Persona Selector -->
+                    <div class="persona-section">
+                        <div class="section-label">Select Persona</div>
+                        <div class="persona-scroll" id="personaList">
+                            <button class="persona-chip active" data-persona="default">
+                                <span class="persona-avatar">&#129302;</span>
+                                Default
+                            </button>
+                            <button class="persona-chip" data-persona="executive">
+                                <span class="persona-avatar">&#128084;</span>
+                                Executive
+                            </button>
+                            <button class="persona-chip" data-persona="creative">
+                                <span class="persona-avatar">&#127912;</span>
+                                Creative
+                            </button>
+                            <button class="persona-chip" data-persona="technical">
+                                <span class="persona-avatar">&#128187;</span>
+                                Technical
+                            </button>
+                            <button class="persona-chip" data-persona="friendly">
+                                <span class="persona-avatar">&#128522;</span>
+                                Friendly
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Stats Grid -->
+                    <div class="stats-grid">
+                        <div class="stat-card" onclick="showTab('history')">
+                            <div class="stat-icon">&#128172;</div>
+                            <div class="stat-value" id="statTotal">0</div>
+                            <div class="stat-label">Total Chats</div>
+                            <div class="stat-trend">+12%</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">&#128197;</div>
+                            <div class="stat-value" id="statToday">0</div>
+                            <div class="stat-label">Today</div>
+                        </div>
+                        <div class="stat-card" onclick="showTab('rules')">
+                            <div class="stat-icon">&#128736;</div>
+                            <div class="stat-value" id="statRules">0</div>
+                            <div class="stat-label">Rules</div>
+                        </div>
+                        <div class="stat-card" onclick="showTab('providers')">
+                            <div class="stat-icon">&#9881;</div>
+                            <div class="stat-value" id="statProviders">0</div>
+                            <div class="stat-label">Providers</div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="section-label">Quick Actions</div>
+                    <div class="quick-actions">
+                        <button class="quick-action" onclick="openAddRule()">
+                            <div class="quick-action-icon">&#128736;</div>
+                            <div class="quick-action-label">Add Rule</div>
+                        </button>
+                        <button class="quick-action" onclick="openAddProvider()">
+                            <div class="quick-action-icon">&#128187;</div>
+                            <div class="quick-action-label">Add AI</div>
+                        </button>
+                        <button class="quick-action" onclick="showTab('history')">
+                            <div class="quick-action-icon">&#128220;</div>
+                            <div class="quick-action-label">History</div>
+                        </button>
+                        <button class="quick-action" onclick="testAPI()">
+                            <div class="quick-action-icon">&#128268;</div>
+                            <div class="quick-action-label">Test</div>
+                        </button>
+                    </div>
+
+                    <!-- Live Activity -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <div class="card-title-icon">&#127775;</div>
+                                Live Activity
+                            </div>
+                            <div class="card-badge">Live</div>
+                        </div>
+                        <div class="activity-list" id="activityFeed">
+                            <div class="activity-item">
+                                <div class="activity-icon success">&#10003;</div>
+                                <div class="activity-content">
+                                    <div class="activity-text">ARIA is ready to assist you</div>
+                                    <div class="activity-time">Just now</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- API Usage -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <div class="card-title-icon">&#128202;</div>
+                                API Usage
+                            </div>
+                            <span style="font-size: 13px; color: var(--success); font-weight: 600;">&#9679; Online</span>
+                        </div>
+                        <div class="usage-list">
+                            <div class="usage-item">
+                                <div class="usage-header">
+                                    <span class="usage-label">OpenAI GPT-4</span>
+                                    <span class="usage-value" id="openaiPercent">0%</span>
+                                </div>
+                                <div class="usage-bar">
+                                    <div class="usage-fill" id="openaiBar" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            <div class="usage-item">
+                                <div class="usage-header">
+                                    <span class="usage-label">Rate Limit</span>
+                                    <span class="usage-value">23%</span>
+                                </div>
+                                <div class="usage-bar">
+                                    <div class="usage-fill" style="width: 23%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- HISTORY TAB -->
+                <div class="tab-content" id="tab-history">
+                    <div class="card" style="margin-top: 8px;">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <div class="card-title-icon">&#128220;</div>
+                                Conversations
+                            </div>
+                            <button class="header-btn" onclick="deleteAllConversations()" style="width: 36px; height: 36px;">
+                                &#128465;
+                            </button>
+                        </div>
+                        <div id="conversationsList">
+                            <div class="empty-state">
+                                <div class="empty-icon">&#128172;</div>
+                                <div class="empty-title">No conversations yet</div>
+                                <div>Start talking to ARIA to see your history here</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RULES TAB -->
+                <div class="tab-content" id="tab-rules">
+                    <button class="btn btn-primary btn-full" onclick="openAddRule()" style="margin: 8px 0 16px;">
+                        + Add Routing Rule
+                    </button>
+                    <div id="rulesList">
+                        <div class="empty-state">
+                            <div class="empty-icon">&#128736;</div>
+                            <div class="empty-title">No rules yet</div>
+                            <div>Create rules to automate your workflow</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PROVIDERS TAB -->
+                <div class="tab-content" id="tab-providers">
+                    <button class="btn btn-primary btn-full" onclick="openAddProvider()" style="margin: 8px 0 16px;">
+                        + Add AI Provider
+                    </button>
+                    <div id="providersList">
+                        <div class="empty-state">
+                            <div class="empty-icon">&#128187;</div>
+                            <div class="empty-title">No providers yet</div>
+                            <div>Add your AI API keys to get started</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SETTINGS TAB -->
+                <div class="tab-content" id="tab-settings">
+                    <div style="margin-top: 8px;">
+                        <div class="card">
+                            <div class="card-title" style="margin-bottom: 16px;">Appearance</div>
+                            
+                            <div class="list-item" style="background: transparent; padding: 12px 0;">
+                                <div class="list-content">
+                                    <div class="list-title">Dark Mode</div>
+                                    <div class="list-subtitle">OLED optimized dark theme</div>
+                                </div>
+                                <div class="toggle-switch active" id="themeToggle" onclick="toggleTheme()"></div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-title" style="margin-bottom: 16px;">Account</div>
+                            
+                            <button class="btn btn-secondary btn-full" onclick="logout()">
+                                Sign Out
+                            </button>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-title" style="margin-bottom: 16px;">Debug</div>
+                            
+                            <button class="btn btn-secondary btn-full" onclick="testAPI()" style="margin-bottom: 12px;">
+                                Test Connection
+                            </button>
+                            
+                            <div id="debugResult" style="font-size: 13px; color: var(--text-tertiary); text-align: center;"></div>
+                        </div>
+
+                        <div style="text-align: center; padding: 24px; color: var(--text-muted); font-size: 12px;">
+                            ARIA v2.0 &#8226; Premium Edition
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <button class="nav-item active" onclick="switchTab('home', this)">
+                <span class="nav-icon">&#127968;</span>
+                <span>Home</span>
+            </button>
+            <button class="nav-item" onclick="switchTab('history', this)">
+                <span class="nav-icon">&#128220;</span>
+                <span>History</span>
+            </button>
+            <button class="nav-item" onclick="switchTab('rules', this)">
+                <span class="nav-icon">&#128736;</span>
+                <span>Rules</span>
+            </button>
+            <button class="nav-item" onclick="switchTab('providers', this)">
+                <span class="nav-icon">&#9881;</span>
+                <span>AI</span>
+            </button>
+            <button class="nav-item" onclick="switchTab('settings', this)">
+                <span class="nav-icon">&#9965;</span>
+                <span>Settings</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- Add Rule Modal -->
+    <div class="modal-overlay" id="addRuleModal">
+        <div class="bottom-sheet">
+            <div class="sheet-handle"></div>
+            <div class="sheet-header">
+                <div class="sheet-title">Add Rule</div>
+                <button class="sheet-close" onclick="closeModal('addRuleModal')">&#10005;</button>
+            </div>
+            <div class="sheet-content">
+                <div class="form-group">
+                    <label class="form-label">Rule Name</label>
+                    <input type="text" class="form-input" id="ruleName" placeholder="e.g., Urgent Messages">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Condition</label>
+                    <select class="form-select" id="ruleCondition">
+                        <option value="contains">Contains</option>
+                        <option value="starts_with">Starts with</option>
+                        <option value="keyword">Has keyword</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Keywords</label>
+                    <input type="text" class="form-input" id="ruleKeywords" placeholder="urgent, asap, emergency">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Channel</label>
+                    <select class="form-select" id="ruleChannel">
+                        <option value="discord">Discord</option>
+                        <option value="telegram">Telegram</option>
+                        <option value="slack">Slack</option>
+                        <option value="email">Email</option>
+                        <option value="sms">SMS</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Destination</label>
+                    <input type="text" class="form-input" id="ruleDestination" placeholder="Webhook URL or email">
+                </div>
+
+                <button class="btn btn-primary btn-full" onclick="addRule()">Create Rule</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Provider Modal -->
+    <div class="modal-overlay" id="addProviderModal">
+        <div class="bottom-sheet">
+            <div class="sheet-handle"></div>
+            <div class="sheet-header">
+                <div class="sheet-title">Add Provider</div>
+                <button class="sheet-close" onclick="closeModal('addProviderModal')">&#10005;</button>
+            </div>
+            <div class="sheet-content">
+                <div class="form-group">
+                    <label class="form-label">Provider</label>
+                    <select class="form-select" id="providerType">
+                        <option value="openai">OpenAI GPT-4</option>
+                        <option value="anthropic">Anthropic Claude</option>
+                        <option value="google">Google Gemini</option>
+                        <option value="mistral">Mistral AI</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Label (optional)</label>
+                    <input type="text" class="form-input" id="providerLabel" placeholder="My API Key">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">API Key</label>
+                    <input type="password" class="form-input" id="providerKey" placeholder="sk-...">
+                </div>
+
+                <button class="btn btn-primary btn-full" onclick="addProvider()">Add Provider</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // ARIA MOBILE APP - PREMIUM EDITION
+        // ============================================
+        
+        const API_URL = window.location.origin + '/api/v1';
+        let authToken = localStorage.getItem('aria_token') || '';
+        let isRecording = false;
+        let currentPersona = 'default';
+        let currentTab = 'home';
+        let pullStartY = 0;
+        let isPulling = false;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            updateGreeting();
+            if (authToken) {
+                showMainApp();
+                loadAllData();
+            }
+            setupPersonaButtons();
+            setupPullToRefresh();
+        });
+
+        // Update greeting based on time
+        function updateGreeting() {
+            const hour = new Date().getHours();
+            const greeting = document.getElementById('greeting');
+            if (hour < 12) greeting.textContent = 'Good morning';
+            else if (hour < 18) greeting.textContent = 'Good afternoon';
+            else greeting.textContent = 'Good evening';
+        }
+
+        // ============================================
+        // DYNAMIC ISLAND NOTIFICATIONS
+        // ============================================
+        
+        function showIsland(title, subtitle = '', type = 'info', duration = 3000) {
+            const island = document.getElementById('dynamicIsland');
+            const icon = document.getElementById('islandIcon');
+            
+            document.getElementById('islandTitle').textContent = title;
+            document.getElementById('islandSubtitle').textContent = subtitle;
+            
+            icon.className = 'island-icon ' + type;
+            icon.textContent = type === 'success' ? '&#10003;' : 
+                              type === 'error' ? '&#10007;' : 
+                              type === 'warning' ? '&#9888;' : '&#8505;';
+            
+            island.classList.add('show');
+            
+            setTimeout(() => {
+                island.classList.remove('show');
+            }, duration);
+        }
+
+        // ============================================
+        // AUTHENTICATION
+        // ============================================
+        
+        async function login() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            try {
+                const res = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await res.json();
+                
+                if (data.token) {
+                    authToken = data.token;
+                    localStorage.setItem('aria_token', authToken);
+                    showMainApp();
+                    loadAllData();
+                    showIsland('Welcome back!', 'You\'re now signed in', 'success');
+                } else {
+                    showIsland('Sign in failed', data.message || 'Check your credentials', 'error');
+                }
+            } catch (e) {
+                showIsland('Connection error', 'Please check your internet', 'error');
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('aria_token');
+            location.reload();
+        }
+
+        function showMainApp() {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('mainApp').style.display = 'flex';
+        }
+
+        // ============================================
+        // API HELPERS
+        // ============================================
+        
+        async function fetchAPI(endpoint, options = {}) {
+            const headers = { 'Content-Type': 'application/json', ...options.headers };
+            if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
+            
+            try {
+                const res = await fetch(`${API_URL}${endpoint}`, { ...options, headers });
+                if (res.status === 401) {
+                    logout();
+                    return null;
+                }
+                return await res.json();
+            } catch (e) {
+                return null;
+            }
+        }
+
+        // ============================================
+        // NAVIGATION
+        // ============================================
+        
+        function switchTab(tab, btn) {
+            currentTab = tab;
+            
+            // Update content
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.getElementById(`tab-${tab}`).classList.add('active');
+            
+            // Update nav
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+            
+            // Load data for tab
+            if (tab === 'history') loadConversations();
+            if (tab === 'rules') loadRules();
+            if (tab === 'providers') loadProviders();
+            
+            // Scroll to top
+            document.getElementById('mainContent').scrollTop = 0;
+        }
+
+        function showTab(tab) {
+            const navItems = document.querySelectorAll('.nav-item');
+            const tabIndex = ['home', 'history', 'rules', 'providers', 'settings'].indexOf(tab);
+            if (tabIndex >= 0) switchTab(tab, navItems[tabIndex]);
+        }
+
+        // ============================================
+        // PULL TO REFRESH
+        // ============================================
+        
+        function setupPullToRefresh() {
+            const content = document.getElementById('mainContent');
+            const pullRefresh = document.getElementById('pullRefresh');
+            
+            content.addEventListener('touchstart', (e) => {
+                if (content.scrollTop === 0) {
+                    pullStartY = e.touches[0].clientY;
+                    isPulling = true;
+                }
+            }, { passive: true });
+            
+            content.addEventListener('touchmove', (e) => {
+                if (!isPulling) return;
+                
+                const pullDist = e.touches[0].clientY - pullStartY;
+                if (pullDist > 0 && pullDist < 100) {
+                    pullRefresh.style.transform = `translateY(${pullDist}px)`;
+                    pullRefresh.classList.add('visible');
+                }
+            }, { passive: true });
+            
+            content.addEventListener('touchend', () => {
+                if (!isPulling) return;
+                isPulling = false;
+                
+                const pullDist = parseInt(pullRefresh.style.transform?.replace('translateY(', '') || 0);
+                
+                if (pullDist > 60) {
+                    refreshData();
+                }
+                
+                pullRefresh.style.transform = '';
+                pullRefresh.classList.remove('visible');
+            });
+        }
+
+        // ============================================
+        // VOICE RECORDING
+        // ============================================
+        
+        function toggleRecording() {
+            const btn = document.getElementById('recordBtn');
+            const status = document.getElementById('recordStatus');
+            const wave = document.getElementById('soundWave');
+            
+            isRecording = !isRecording;
+            
+            if (isRecording) {
+                btn.classList.add('recording');
+                status.textContent = 'Listening...';
+                status.classList.add('listening');
+                wave.classList.add('active');
+                
+                // Simulate recording
+                setTimeout(() => {
+                    toggleRecording();
+                    showIsland('Message sent!', 'Processing with AI...', 'success');
+                    addActivity('Voice message processed', 'success');
+                }, 4000);
+            } else {
+                btn.classList.remove('recording');
+                status.textContent = 'Tap to speak with ARIA';
+                status.classList.remove('listening');
+                wave.classList.remove('active');
+            }
+        }
+
+        // ============================================
+        // PERSONA SELECTOR
+        // ============================================
+        
+        function setupPersonaButtons() {
+            document.querySelectorAll('.persona-chip').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.persona-chip').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentPersona = btn.dataset.persona;
+                    showIsland(`${btn.textContent.trim()} activated`, 'Persona switched', 'info', 2000);
+                });
+            });
+        }
+
+        // ============================================
+        // MODALS
+        // ============================================
+        
+        function openModal(id) {
+            document.getElementById(id).classList.add('active');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+
+        function openAddRule() {
+            openModal('addRuleModal');
+        }
+
+        function openAddProvider() {
+            openModal('addProviderModal');
+        }
+
+        // Close modal on overlay click
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) overlay.classList.remove('active');
+            });
+        });
+
+        // ============================================
+        // DATA OPERATIONS
+        // ============================================
+        
+        async function addRule() {
+            const name = document.getElementById('ruleName').value;
+            const condition = document.getElementById('ruleCondition').value;
+            const keywords = document.getElementById('ruleKeywords').value;
+            const channel = document.getElementById('ruleChannel').value;
+            const destination = document.getElementById('ruleDestination').value;
+            
+            if (!name || !keywords || !destination) {
+                showIsland('Missing fields', 'Please fill in all required fields', 'warning');
+                return;
+            }
+            
+            const result = await fetchAPI('/routes', {
+                method: 'POST',
+                body: JSON.stringify({
+                    name,
+                    conditions: [{ type: condition, value: keywords }],
+                    actions: [{ channel, destination }]
+                })
+            });
+            
+            if (result) {
+                closeModal('addRuleModal');
+                loadRules();
+                loadStats();
+                showIsland('Rule created!', `${name} is now active`, 'success');
+                addActivity(`Created rule: ${name}`, 'success');
+            }
+        }
+
+        async function addProvider() {
+            const type = document.getElementById('providerType').value;
+            const label = document.getElementById('providerLabel').value;
+            const key = document.getElementById('providerKey').value;
+            
+            if (!key) {
+                showIsland('Missing API key', 'Please enter your API key', 'warning');
+                return;
+            }
+            
+            const result = await fetchAPI('/providers', {
+                method: 'POST',
+                body: JSON.stringify({ provider: type, label, apiKey: key })
+            });
+            
+            if (result) {
+                closeModal('addProviderModal');
+                loadProviders();
+                showIsland('Provider added!', `${type} is now connected`, 'success');
+            }
+        }
+
+        async function loadAllData() {
+            loadStats();
+            loadConversations();
+            loadRules();
+            loadProviders();
+        }
+
+        async function loadStats() {
+            const usage = await fetchAPI('/user/usage');
+            const rules = await fetchAPI('/routes');
+            const providers = await fetchAPI('/providers/configured');
+            
+            document.getElementById('statTotal').textContent = usage?.totalConversations || 0;
+            document.getElementById('statToday').textContent = usage?.monthlyConversations || 0;
+            document.getElementById('statRules').textContent = rules?.routes?.length || 0;
+            document.getElementById('statProviders').textContent = providers?.providers?.length || 0;
+            
+            // Update usage bar
+            const openaiPercent = Math.min((usage?.totalConversations || 0) / 100 * 10, 100);
+            document.getElementById('openaiPercent').textContent = Math.round(openaiPercent) + '%';
+            document.getElementById('openaiBar').style.width = openaiPercent + '%';
+        }
+
+        async function loadConversations() {
+            const data = await fetchAPI('/conversations');
+            const list = document.getElementById('conversationsList');
+            
+            if (!data?.conversations?.length) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">&#128172;</div>
+                        <div class="empty-title">No conversations yet</div>
+                        <div>Start talking to ARIA to see your history here</div>
+                    </div>`;
+                return;
+            }
+            
+            list.innerHTML = data.conversations.map(c => `
+                <div class="conversation-item">
+                    <div class="conversation-avatar">&#127908;</div>
+                    <div class="conversation-body">
+                        <div class="conversation-query">${escapeHtml(c.transcript?.substring(0, 60) || '')}${c.transcript?.length > 60 ? '...' : ''}</div>
+                        <div class="conversation-response">${escapeHtml(c.aiResponse?.substring(0, 100) || '')}${c.aiResponse?.length > 100 ? '...' : ''}</div>
+                        <div class="conversation-meta">
+                            <span>${formatDate(c.createdAt)}</span>
+                            <span class="conversation-tag">${c.modelUsed}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function loadRules() {
+            const data = await fetchAPI('/routes');
+            const list = document.getElementById('rulesList');
+            
+            if (!data?.routes?.length) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">&#128736;</div>
+                        <div class="empty-title">No rules yet</div>
+                        <div>Create rules to automate your workflow</div>
+                    </div>`;
+                return;
+            }
+            
+            list.innerHTML = data.routes.map(r => `
+                <div class="list-item">
+                    <div class="toggle-switch ${r.isEnabled ? 'active' : ''}" onclick="toggleRule('${r.id}')"></div>
+                    <div class="list-content">
+                        <div class="list-title">${escapeHtml(r.name)}</div>
+                        <div class="list-subtitle">${r.conditions?.length || 0} conditions</div>
+                    </div>
+                    <button class="list-action" onclick="deleteRule('${r.id}')">&#128465;</button>
+                </div>
+            `).join('');
+        }
+
+        async function loadProviders() {
+            const data = await fetchAPI('/providers/configured');
+            const list = document.getElementById('providersList');
+            
+            if (!data?.providers?.length) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">&#128187;</div>
+                        <div class="empty-title">No providers yet</div>
+                        <div>Add your AI API keys to get started</div>
+                    </div>`;
+                return;
+            }
+            
+            list.innerHTML = data.providers.map(p => `
+                <div class="list-item">
+                    <div class="list-icon">&#9881;</div>
+                    <div class="list-content">
+                        <div class="list-title">${escapeHtml(p.label || p.provider)}</div>
+                        <div class="list-subtitle" style="color: var(--success);">&#9679; Connected</div>
+                    </div>
+                    <button class="list-action" onclick="deleteProvider('${p.id}')">&#128465;</button>
+                </div>
+            `).join('');
+        }
+
+        async function toggleRule(id) {
+            const result = await fetchAPI(`/routes/${id}/toggle`, { method: 'PATCH' });
+            if (result) {
+                loadRules();
+                showIsland(result.isEnabled ? 'Rule enabled' : 'Rule disabled', '', 'success', 2000);
+            }
+        }
+
+        async function deleteRule(id) {
+            if (!confirm('Delete this rule?')) return;
+            await fetchAPI(`/routes/${id}`, { method: 'DELETE' });
+            loadRules();
+            loadStats();
+            showIsland('Rule deleted', '', 'success', 2000);
+        }
+
+        async function deleteProvider(id) {
+            if (!confirm('Remove this provider?')) return;
+            await fetchAPI(`/providers/${id}`, { method: 'DELETE' });
+            loadProviders();
+            showIsland('Provider removed', '', 'success', 2000);
+        }
+
+        async function deleteAllConversations() {
+            if (!confirm('Delete all conversations?')) return;
+            await fetchAPI('/conversations', { method: 'DELETE' });
+            loadConversations();
+            loadStats();
+            showIsland('History cleared', 'All conversations deleted', 'success');
+        }
+
+        function refreshData() {
+            loadAllData();
+            showIsland('Refreshed', 'Data updated', 'success', 2000);
+        }
+
+        function addActivity(text, type = 'info') {
+            const feed = document.getElementById('activityFeed');
+            const icons = { success: '&#10003;', error: '&#10007;', info: '&#8505;', warning: '&#9888;' };
+            const colors = { success: 'success', error: 'error', info: 'info', warning: 'warning' };
+            
+            const item = document.createElement('div');
+            item.className = 'activity-item';
+            item.innerHTML = `
+                <div class="activity-icon ${colors[type]}">${icons[type]}</div>
+                <div class="activity-content">
+                    <div class="activity-text">${text}</div>
+                    <div class="activity-time">Just now</div>
+                </div>
+            `;
+            
+            feed.insertBefore(item, feed.firstChild);
+            if (feed.children.length > 5) feed.lastChild.remove();
+        }
+
+        // ============================================
+        // THEME & SETTINGS
+        // ============================================
+        
+        function toggleTheme() {
+            const toggle = document.getElementById('themeToggle');
+            toggle.classList.toggle('active');
+            showIsland('Theme updated', 'Dark mode is always better &#128526;', 'success', 2000);
+        }
+
+        async function testAPI() {
+            const resultDiv = document.getElementById('debugResult');
+            resultDiv.innerHTML = '<div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
+            
+            try {
+                const res = await fetch(`${API_URL}/health`);
+                if (res.ok) {
+                    resultDiv.innerHTML = '<span style="color: var(--success);">&#10003; Connected to ARIA backend</span>';
+                    showIsland('Connection test', 'Backend is online', 'success', 2000);
+                } else {
+                    resultDiv.innerHTML = '<span style="color: var(--error);">&#10007; Backend error</span>';
+                    showIsland('Connection failed', 'Backend returned an error', 'error');
+                }
+            } catch (e) {
+                resultDiv.innerHTML = '<span style="color: var(--error);">&#10007; Cannot connect</span>';
+                showIsland('Connection failed', 'Is the server running?', 'error');
+            }
+        }
+
+        function showNotifications() {
+            showIsland('3 new notifications', 'Tap to view', 'info');
+            document.getElementById('notifBadge').style.display = 'none';
+        }
+
+        // ============================================
+        // UTILITIES
+        // ============================================
+        
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return 'Unknown';
+            const date = new Date(dateString);
+            const now = new Date();
+            const diff = now - date;
+            
+            if (diff < 60000) return 'Just now';
+            if (diff < 3600000) return Math.floor(diff / 60000) + 'm ago';
+            if (diff < 86400000) return Math.floor(diff / 3600000) + 'h ago';
+            return date.toLocaleDateString();
+        }
+    </script>
+</body>
+</html>

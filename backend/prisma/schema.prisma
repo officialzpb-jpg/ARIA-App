@@ -1,0 +1,94 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               String   @id @default(uuid())
+  email            String   @unique
+  password         String
+  name             String?
+  subscriptionTier String   @default("free")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  lastActive       DateTime @default(now())
+
+  // Relations
+  apiKeys        ApiKey[]
+  routingRules   RoutingRule[]
+  conversations  Conversation[]
+  messageLogs    MessageLog[]
+
+  @@map("users")
+}
+
+model ApiKey {
+  id           String   @id @default(uuid())
+  userId       String
+  provider     String // openai, anthropic, google, mistral, local
+  encryptedKey String
+  label        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("api_keys")
+}
+
+model RoutingRule {
+  id         String   @id @default(uuid())
+  userId     String
+  name       String
+  conditions Json // Array of { type, value }
+  actions    Json // Array of { channel, destination }
+  priority   Int     @default(0)
+  isEnabled  Boolean @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("routing_rules")
+}
+
+model Conversation {
+  id           String   @id @default(uuid())
+  userId       String
+  transcript   String
+  aiResponse   String
+  modelUsed    String
+  latencyMs    Int?
+  routedTo     String[] @default([])
+  createdAt    DateTime @default(now())
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("conversations")
+}
+
+model MessageLog {
+  id          String    @id @default(uuid())
+  userId      String
+  channel     String // discord, telegram, sms, email, slack, webhook
+  destination String
+  content     String
+  status      String // sent, failed, pending
+  error       String?
+  createdAt   DateTime  @default(now())
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("message_logs")
+}

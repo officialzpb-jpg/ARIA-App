@@ -1,0 +1,2578 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARIA Dashboard - AI Voice Assistant</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: rgba(18, 18, 26, 0.8);
+            --bg-tertiary: rgba(26, 26, 37, 0.6);
+            --accent-primary: #00f0ff;
+            --accent-secondary: #00c4cc;
+            --accent-gradient: linear-gradient(135deg, #00f0ff 0%, #00c4cc 100%);
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0b0;
+            --text-muted: #606070;
+            --border: rgba(255, 255, 255, 0.1);
+            --glass-bg: rgba(18, 18, 26, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            --success: #00ff88;
+            --warning: #ffaa00;
+            --error: #ff4444;
+            --info: #4488ff;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --radius: 16px;
+            --radius-sm: 8px;
+        }
+
+        [data-theme="light"] {
+            --bg-primary: #f5f5f7;
+            --bg-secondary: rgba(255, 255, 255, 0.8);
+            --bg-tertiary: rgba(240, 240, 245, 0.6);
+            --text-primary: #1a1a2e;
+            --text-secondary: #4a4a5a;
+            --text-muted: #8a8a9a;
+            --border: rgba(0, 0, 0, 0.1);
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(0, 0, 0, 0.08);
+            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Custom Background */
+        body.custom-bg {
+            background-attachment: fixed;
+            background-size: cover;
+            background-position: center;
+        }
+
+        body.custom-bg::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--bg-primary);
+            opacity: 0.85;
+            z-index: -1;
+        }
+
+        /* Glassmorphism Base */
+        .glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(-20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* App Layout */
+        .app {
+            display: flex;
+            min-height: 100vh;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            position: fixed;
+            height: 100vh;
+            z-index: 100;
+            transition: var(--transition);
+        }
+
+        .sidebar.collapsed {
+            width: 80px;
+        }
+
+        .sidebar-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 44px;
+            height: 44px;
+            background: var(--accent-gradient);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            animation: float 3s ease-in-out infinite;
+            box-shadow: 0 4px 20px rgba(0, 240, 255, 0.3);
+        }
+
+        .logo-text { 
+            font-size: 26px; 
+            font-weight: 700; 
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .sidebar.collapsed .logo-text,
+        .sidebar.collapsed .nav-title,
+        .sidebar.collapsed .nav-item span {
+            display: none;
+        }
+
+        .nav-section { 
+            padding: 16px; 
+        }
+
+        .nav-title {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--text-muted);
+            padding: 0 12px;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 16px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--text-secondary);
+            text-decoration: none;
+            margin-bottom: 6px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: var(--accent-primary);
+            transform: scaleY(0);
+            transition: transform 0.3s;
+        }
+
+        .nav-item:hover { 
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            transform: translateX(4px);
+        }
+
+        .nav-item:hover::before {
+            transform: scaleY(1);
+        }
+
+        .nav-item.active { 
+            background: var(--accent-gradient);
+            color: var(--bg-primary);
+            box-shadow: 0 4px 20px rgba(0, 240, 255, 0.3);
+        }
+
+        .nav-item.active::before {
+            display: none;
+        }
+
+        .nav-icon {
+            width: 22px;
+            height: 22px;
+            flex-shrink: 0;
+        }
+
+        /* Main Content */
+        .main { 
+            flex: 1; 
+            margin-left: 280px; 
+            padding: 24px 32px;
+            transition: var(--transition);
+        }
+
+        .sidebar.collapsed ~ .main {
+            margin-left: 80px;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            padding: 20px 24px;
+            border-radius: var(--radius);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .menu-toggle {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            border: 1px solid var(--glass-border);
+            background: var(--glass-bg);
+            color: var(--text-primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .menu-toggle:hover {
+            background: var(--accent-primary);
+            color: var(--bg-primary);
+            transform: scale(1.1);
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .breadcrumb a {
+            color: var(--accent-primary);
+            text-decoration: none;
+        }
+
+        .header-title { 
+            font-size: 28px; 
+            font-weight: 700;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        /* Search Bar */
+        .search-bar {
+            position: relative;
+            width: 300px;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 12px 16px 12px 44px;
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+            background: var(--glass-bg);
+            color: var(--text-primary);
+            font-size: 14px;
+            transition: var(--transition);
+        }
+
+        .search-bar input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(0, 240, 255, 0.1);
+        }
+
+        .search-bar svg {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+
+        /* Notification Bell */
+        .notification-btn {
+            position: relative;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+            background: var(--glass-bg);
+            color: var(--text-primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .notification-btn:hover {
+            background: var(--accent-primary);
+            color: var(--bg-primary);
+            transform: scale(1.1);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            width: 20px;
+            height: 20px;
+            background: var(--error);
+            border-radius: 50%;
+            font-size: 11px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: pulse 2s infinite;
+        }
+
+        /* User Profile */
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 16px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .user-profile:hover {
+            background: var(--glass-bg);
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--accent-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .user-info {
+            text-align: left;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .user-role {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 8px;
+            min-width: 200px;
+            border-radius: var(--radius);
+            overflow: hidden;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: var(--transition);
+        }
+
+        .user-profile:hover .dropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-item {
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .dropdown-item:hover {
+            background: var(--accent-primary);
+            color: var(--bg-primary);
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+            background: var(--glass-bg);
+            color: var(--text-primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .theme-toggle:hover {
+            transform: rotate(20deg) scale(1.1);
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            font-size: 14px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:active::after {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-primary { 
+            background: var(--accent-gradient);
+            color: var(--bg-primary);
+            box-shadow: 0 4px 20px rgba(0, 240, 255, 0.3);
+        }
+
+        .btn-primary:hover { 
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0, 240, 255, 0.4);
+        }
+
+        .btn-secondary { 
+            background: var(--glass-bg);
+            color: var(--text-primary);
+            border: 1px solid var(--glass-border);
+        }
+
+        .btn-secondary:hover { 
+            background: var(--accent-primary);
+            color: var(--bg-primary);
+            border-color: var(--accent-primary);
+        }
+
+        .btn-danger { 
+            background: var(--error);
+            color: white;
+        }
+
+        .btn-small { padding: 8px 16px; font-size: 12px; }
+
+        /* Floating Action Button */
+        .fab {
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--accent-gradient);
+            color: var(--bg-primary);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 8px 30px rgba(0, 240, 255, 0.4);
+            transition: var(--transition);
+            z-index: 50;
+        }
+
+        .fab:hover {
+            transform: scale(1.1) rotate(90deg);
+            box-shadow: 0 12px 40px rgba(0, 240, 255, 0.5);
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            padding: 28px;
+            border-radius: var(--radius);
+            position: relative;
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--accent-gradient);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: var(--accent-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            opacity: 0.2;
+        }
+
+        .stat-trend {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 8px;
+            border-radius: 20px;
+            background: rgba(0, 255, 136, 0.1);
+            color: var(--success);
+        }
+
+        .stat-trend.down {
+            background: rgba(255, 68, 68, 0.1);
+            color: var(--error);
+        }
+
+        .stat-label { 
+            font-size: 14px; 
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .stat-value { 
+            font-size: 36px; 
+            font-weight: 700;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Sparkline */
+        .sparkline {
+            height: 40px;
+            margin-top: 16px;
+        }
+
+        /* Cards */
+        .card {
+            border-radius: var(--radius);
+            padding: 28px;
+            margin-bottom: 24px;
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .card-title { 
+            font-size: 20px; 
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .card-title-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: var(--accent-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        /* Activity Feed */
+        .activity-feed {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .activity-item {
+            display: flex;
+            gap: 16px;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--glass-border);
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .activity-icon.success { background: rgba(0, 255, 136, 0.2); color: var(--success); }
+        .activity-icon.error { background: rgba(255, 68, 68, 0.2); color: var(--error); }
+        .activity-icon.info { background: rgba(68, 136, 255, 0.2); color: var(--info); }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-text {
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .activity-time {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .activity-live {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            margin-left: 8px;
+            animation: pulse 1.5s infinite;
+        }
+
+        /* Calendar */
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+        }
+
+        .calendar-day-header {
+            text-align: center;
+            padding: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .calendar-day:hover {
+            background: var(--glass-bg);
+        }
+
+        .calendar-day.active {
+            background: var(--accent-gradient);
+            color: var(--bg-primary);
+        }
+
+        .calendar-day.has-data::after {
+            content: '';
+            position: absolute;
+            bottom: 6px;
+            width: 4px;
+            height: 4px;
+            background: var(--accent-primary);
+            border-radius: 50%;
+        }
+
+        .calendar-day-number {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .calendar-day-count {
+            font-size: 10px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        /* Charts */
+        .chart-container {
+            height: 300px;
+            position: relative;
+        }
+
+        .chart-placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        /* API Usage Bar */
+        .api-usage {
+            margin-top: 24px;
+        }
+
+        .usage-item {
+            margin-bottom: 20px;
+        }
+
+        .usage-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .usage-bar {
+            height: 8px;
+            background: var(--glass-bg);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .usage-fill {
+            height: 100%;
+            border-radius: 4px;
+            background: var(--accent-gradient);
+            transition: width 1s ease-out;
+        }
+
+        /* Status Indicators */
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-online {
+            background: rgba(0, 255, 136, 0.1);
+            color: var(--success);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: currentColor;
+            animation: pulse 2s infinite;
+        }
+
+        /* Weather/Time Widget */
+        .widget-time {
+            text-align: center;
+            padding: 24px;
+        }
+
+        .widget-clock {
+            font-size: 48px;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .widget-date {
+            font-size: 16px;
+            color: var(--text-secondary);
+            margin-top: 8px;
+        }
+
+        /* Toast Notifications */
+        .toast-container {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .toast {
+            padding: 16px 24px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: slideIn 0.3s ease-out;
+            min-width: 300px;
+        }
+
+        .toast.success { background: var(--success); color: var(--bg-primary); }
+        .toast.error { background: var(--error); color: white; }
+        .toast.info { background: var(--info); color: white; }
+
+        /* Skeleton Loading */
+        .skeleton {
+            background: linear-gradient(90deg, var(--glass-bg) 25%, var(--bg-tertiary) 50%, var(--glass-bg) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 8px;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--glass-bg);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent-primary);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-secondary);
+        }
+
+        /* Tab Content */
+        .tab-content { 
+            display: none;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .tab-content.active { display: block; }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-overlay.active { display: flex; animation: fadeIn 0.3s ease-out; }
+
+        .modal {
+            border-radius: var(--radius);
+            padding: 32px;
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .modal-title { 
+            font-size: 24px; 
+            font-weight: 600; 
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .form-group { margin-bottom: 20px; }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+        }
+
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 14px 18px;
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+            background: var(--glass-bg);
+            color: var(--text-primary);
+            font-size: 15px;
+            transition: var(--transition);
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 4px rgba(0, 240, 255, 0.1);
+        }
+
+        .form-textarea { min-height: 120px; resize: vertical; }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 24px;
+        }
+
+        /* Debug Panel */
+        .debug-panel {
+            position: fixed;
+            bottom: 100px;
+            right: 24px;
+            width: 350px;
+            max-height: 500px;
+            overflow-y: auto;
+            border-radius: var(--radius);
+            z-index: 999;
+            display: none;
+        }
+
+        .debug-panel.active {
+            display: block;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .debug-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .debug-title {
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .debug-content {
+            padding: 16px 20px;
+        }
+
+        .debug-log {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            line-height: 1.6;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .debug-log-entry {
+            padding: 4px 0;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .debug-log-entry.error { color: var(--error); }
+        .debug-log-entry.success { color: var(--success); }
+        .debug-log-entry.info { color: var(--info); }
+
+        .debug-btn {
+            width: 100%;
+            margin-bottom: 8px;
+        }
+
+        /* Toggle Switch */
+        .toggle-switch {
+            width: 52px;
+            height: 28px;
+            background: var(--text-muted);
+            border-radius: 14px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .toggle-switch.active { background: var(--success); }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.3s;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .toggle-switch.active::after { transform: translateX(24px); }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-state-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar { 
+                transform: translateX(-100%);
+                width: 280px;
+            }
+            .sidebar.open { transform: translateX(0); }
+            .main { margin-left: 0; padding: 16px; }
+            .stats-grid { grid-template-columns: 1fr; }
+            .header { flex-direction: column; gap: 16px; }
+            .search-bar { width: 100%; }
+        }
+
+        /* Keyboard Shortcuts Help */
+        .kbd {
+            display: inline-block;
+            padding: 4px 8px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 6px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+        }
+
+        /* Tooltip */
+        [data-tooltip] {
+            position: relative;
+        }
+
+        [data-tooltip]::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%) translateY(-8px);
+            padding: 8px 12px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 12px;
+            border-radius: 8px;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+            border: 1px solid var(--glass-border);
+        }
+
+        [data-tooltip]:hover::after {
+            opacity: 1;
+            visibility: visible;
+        }
+    </style>
+</head>
+<body>
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Login Screen -->
+    <div id="loginScreen" class="login-container">
+        <div class="glass login-box">
+            <div class="login-logo">&#9672;</div>
+            <h1 class="login-title"><span>ARIA</span></h1>
+            <p class="login-subtitle">AI Voice Assistant Dashboard</p>
+            
+            <div id="loginError" class="error hidden"></div>
+            
+            <div id="loginForm">
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-input" id="loginEmail" placeholder="you@example.com" value="test@example.com">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input type="password" class="form-input" id="loginPassword" placeholder="password123" value="password123">
+                </div>
+                <button class="btn btn-primary" onclick="login()">Sign In</button>
+                <p class="toggle-mode">
+                    Don't have an account? <a onclick="toggleAuthMode()">Register</a>
+                </p>
+            </div>
+            
+            <div id="registerForm" class="hidden">
+                <div class="form-group">
+                    <label class="form-label">Name</label>
+                    <input type="text" class="form-input" id="regName" placeholder="Your Name">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-input" id="regEmail" placeholder="you@example.com">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input type="password" class="form-input" id="regPassword" placeholder="Min 8 characters">
+                </div>
+                <button class="btn btn-primary" onclick="register()">Create Account</button>
+                <p class="toggle-mode">
+                    Already have an account? <a onclick="toggleAuthMode()">Sign In</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="mainApp" class="app hidden">
+        <!-- Sidebar -->
+        <aside class="sidebar glass" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <div class="logo-icon">&#9672;</div>
+                    <div class="logo-text">ARIA</div>
+                </div>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-title">Overview</div>
+                <a href="#" class="nav-item active" data-tab="dashboard">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="7" height="7"/>
+                        <rect x="14" y="3" width="7" height="7"/>
+                        <rect x="14" y="14" width="7" height="7"/>
+                        <rect x="3" y="14" width="7" height="7"/>
+                    </svg>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="nav-item" data-tab="conversations">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg>
+                    <span>Conversations</span>
+                </a>
+                <a href="#" class="nav-item" data-tab="analytics">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="20" x2="18" y2="10"/>
+                        <line x1="12" y1="20" x2="12" y2="4"/>
+                        <line x1="6" y1="20" x2="6" y2="14"/>
+                    </svg>
+                    <span>Analytics</span>
+                </a>
+                <a href="#" class="nav-item" data-tab="calendar">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                        <line x1="16" y1="2" x2="16" y2="6"/>
+                        <line x1="8" y1="2" x2="8" y2="6"/>
+                        <line x1="3" y1="10" x2="21" y2="10"/>
+                    </svg>
+                    <span>Calendar</span>
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-title">Configuration</div>
+                <a href="#" class="nav-item" data-tab="routing">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                    </svg>
+                    <span>Routing Rules</span>
+                </a>
+                <a href="#" class="nav-item" data-tab="providers">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                        <line x1="8" y1="21" x2="16" y2="21"/>
+                        <line x1="12" y1="17" x2="12" y2="21"/>
+                    </svg>
+                    <span>AI Providers</span>
+                </a>
+                <a href="#" class="nav-item" data-tab="settings">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                    </svg>
+                    <span>Settings</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main">
+            <!-- Header -->
+            <div class="header glass">
+                <div class="header-left">
+                    <button class="menu-toggle" onclick="toggleSidebar()" data-tooltip="Toggle Sidebar">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="3" y1="12" x2="21" y2="12"/>
+                            <line x1="3" y1="6" x2="21" y2="6"/>
+                            <line x1="3" y1="18" x2="21" y2="18"/>
+                        </svg>
+                    </button>
+                    
+                    <nav class="breadcrumb">
+                        <a href="#" onclick="showTab('dashboard')">ARIA</a>
+                        <span>/</span>
+                        <span id="breadcrumb-current">Dashboard</span>
+                    </nav>
+                </div>
+
+                <div class="header-actions">
+                    <!-- Search -->
+                    <div class="search-bar">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"/>
+                            <path d="m21 21-4.35-4.35"/>
+                        </svg>
+                        <input type="text" placeholder="Search conversations, rules..." id="globalSearch">
+                    </div>
+
+                    <!-- Theme Toggle -->
+                    <button class="theme-toggle" onclick="toggleTheme()" data-tooltip="Toggle Theme">
+                        <svg id="themeIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="5"/>
+                            <line x1="12" y1="1" x2="12" y2="3"/>
+                            <line x1="12" y1="21" x2="12" y2="23"/>
+                            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                            <line x1="1" y1="12" x2="3" y2="12"/>
+                            <line x1="21" y1="12" x2="23" y2="12"/>
+                            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                        </svg>
+                    </button>
+
+                    <!-- Notifications -->
+                    <button class="notification-btn" onclick="showNotifications()" data-tooltip="Notifications">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                        </svg>
+                        <span class="notification-badge" id="notifBadge">3</span>
+                    </button>
+
+                    <!-- User Profile -->
+                    <div class="user-profile">
+                        <div class="user-avatar">U</div>
+                        <div class="user-info">
+                            <div class="user-name">User</div>
+                            <div class="user-role">Admin</div>
+                        </div>
+                        
+                        <div class="glass dropdown">
+                            <div class="dropdown-item" onclick="showTab('settings')">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="3"/>
+                                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82V9a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                                </svg>
+                                Settings
+                            </div>
+                            <div class="dropdown-item" onclick="showKeyboardShortcuts()">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="2" y="4" width="20" height="16" rx="2" ry="2"/>
+                                    <path d="M6 8h.01"/>
+                                    <path d="M10 8h.01"/>
+                                    <path d="M14 8h.01"/>
+                                    <path d="M18 8h.01"/>
+                                    <path d="M8 12h.01"/>
+                                    <path d="M12 12h.01"/>
+                                    <path d="M16 12h.01"/>
+                                    <path d="M7 16h10"/>
+                                </svg>
+                                Shortcuts
+                            </div>
+                            <div class="dropdown-item" onclick="logout()">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                                    <polyline points="16 17 21 12 16 7"/>
+                                    <line x1="21" y1="12" x2="9" y2="12"/>
+                                </svg>
+                                Logout
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dashboard Tab -->
+            <div id="dashboard" class="tab-content active">
+                <!-- Stats Grid -->
+                <div class="stats-grid">
+                    <div class="stat-card glass">
+                        <div class="stat-header">
+                            <div class="stat-icon">&#128172;</div>
+                            <div class="stat-trend">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+                                    <polyline points="17 6 23 6 23 12"/>
+                                </svg>
+                                +12%
+                            </div>
+                        </div>
+                        <div class="stat-label">Total Conversations</div>
+                        <div class="stat-value" id="stat-total">-</div>
+                        <svg class="sparkline" viewBox="0 0 100 40" preserveAspectRatio="none">
+                            <path d="M0,35 Q10,30 20,32 T40,25 T60,28 T80,20 T100,15" fill="none" stroke="var(--accent-primary)" stroke-width="2"/>
+                        </svg>
+                    </div>
+
+                    <div class="stat-card glass">
+                        <div class="stat-header">
+                            <div class="stat-icon">&#128197;</div>
+                            <div class="stat-trend">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+                                    <polyline points="17 6 23 6 23 12"/>
+                                </svg>
+                                +23%
+                            </div>
+                        </div>
+                        <div class="stat-label">This Month</div>
+                        <div class="stat-value" id="stat-month">-</div>
+                        <svg class="sparkline" viewBox="0 0 100 40" preserveAspectRatio="none">
+                            <path d="M0,30 Q15,35 30,28 T60,22 T100,18" fill="none" stroke="var(--accent-primary)" stroke-width="2"/>
+                        </svg>
+                    </div>
+
+                    <div class="stat-card glass">
+                        <div class="stat-header">
+                            <div class="stat-icon">&#9201;</div>
+                            <div class="stat-trend down">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                    <polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/>
+                                    <polyline points="17 18 23 18 23 12"/>
+                                </svg>
+                                -0.3s
+                            </div>
+                        </div>
+                        <div class="stat-label">Avg Response Time</div>
+                        <div class="stat-value" id="stat-latency">-</div>
+                        <svg class="sparkline" viewBox="0 0 100 40" preserveAspectRatio="none">
+                            <path d="M0,20 Q25,25 50,18 T100,22" fill="none" stroke="var(--accent-primary)" stroke-width="2"/>
+                        </svg>
+                    </div>
+
+                    <div class="stat-card glass">
+                        <div class="stat-header">
+                            <div class="stat-icon">&#128736;</div>
+                            <div class="stat-trend">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+                                    <polyline points="17 6 23 6 23 12"/>
+                                </svg>
+                                +2
+                            </div>
+                        </div>
+                        <div class="stat-label">Active Rules</div>
+                        <div class="stat-value" id="stat-rules">-</div>
+                        <svg class="sparkline" viewBox="0 0 100 40" preserveAspectRatio="none">
+                            <path d="M0,35 Q20,35 40,30 T70,25 T100,20" fill="none" stroke="var(--accent-primary)" stroke-width="2"/>
+                        </svg>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px;">
+                    <!-- Recent Conversations -->
+                    <div class="card glass">
+                        <div class="card-header">
+                            <h2 class="card-title">
+                                <span class="card-title-icon">&#128172;</span>
+                                Recent Conversations
+                            </h2>
+                            <button class="btn btn-secondary" onclick="showTab('conversations')">View All</button>
+                        </div>
+                        <div id="recent-conversations">
+                            <div class="loading">
+                                <div class="skeleton" style="height: 60px; margin-bottom: 12px;"></div>
+                                <div class="skeleton" style="height: 60px; margin-bottom: 12px;"></div>
+                                <div class="skeleton" style="height: 60px;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Live Activity Feed -->
+                    <div class="card glass">
+                        <div class="card-header">
+                            <h2 class="card-title">
+                                <span class="card-title-icon">&#127775;</span>
+                                Live Activity
+                                <span class="activity-live"></span>
+                            </h2>
+                        </div>
+                        <div class="activity-feed" id="activityFeed">
+                            <div class="activity-item">
+                                <div class="activity-icon success">&#10003;</div>
+                                <div class="activity-content">
+                                    <div class="activity-text">Server started successfully</div>
+                                    <div class="activity-time">Just now</div>
+                                </div>
+                            </div>
+                            <div class="activity-item">
+                                <div class="activity-icon info">&#8505;</div>
+                                <div class="activity-content">
+                                    <div class="activity-text">Dashboard loaded</div>
+                                    <div class="activity-time">Just now</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- API Usage -->
+                <div class="card glass">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <span class="card-title-icon">&#128202;</span>
+                            API Usage
+                        </h2>
+                        <span class="status-indicator status-online">
+                            <span class="status-dot"></span>
+                            All Systems Operational
+                        </span>
+                    </div>
+                    
+                    <div class="api-usage">
+                        <div class="usage-item">
+                            <div class="usage-header">
+                                <span>OpenAI API</span>
+                                <span>65%</span>
+                            </div>
+                            <div class="usage-bar">
+                                <div class="usage-fill" style="width: 65%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="usage-item">
+                            <div class="usage-header">
+                                <span>Rate Limit</span>
+                                <span>23%</span>
+                            </div>
+                            <div class="usage-bar">
+                                <div class="usage-fill" style="width: 23%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Conversations Tab -->
+            <div id="conversations" class="tab-content">
+                <div class="header glass">
+                    <h1 class="header-title">Conversations</h1>
+                    <button class="btn btn-danger" onclick="deleteAllConversations()">Clear All</button>
+                </div>
+                <div class="card glass">
+                    <div id="all-conversations">
+                        <div class="loading">Loading conversations...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analytics Tab -->
+            <div id="analytics" class="tab-content">
+                <div class="header glass">
+                    <h1 class="header-title">Analytics</h1>
+                </div>
+                
+                <div class="card glass">
+                    <div class="card-header">
+                        <h2 class="card-title">Usage Statistics</h2>
+                    </div>
+                    
+                    <div id="analytics-content">
+                        <div class="loading">Loading analytics...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Calendar Tab -->
+            <div id="calendar" class="tab-content">
+                <div class="header glass">
+                    <h1 class="header-title">Calendar</h1>
+                    <div style="display: flex; gap: 12px;">
+                        <button class="btn btn-secondary" onclick="changeMonth(-1)">&#8249; Prev</button>
+                        <span id="currentMonth" style="font-size: 18px; font-weight: 600;"></span>
+                        <button class="btn btn-secondary" onclick="changeMonth(1)">Next &#8250;</button>
+                    </div>
+                </div>
+                
+                <div class="card glass">
+                    <div class="calendar-grid" id="calendarGrid">
+                        <!-- Calendar will be generated by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Routing Tab -->
+            <div id="routing" class="tab-content">
+                <div class="header glass">
+                    <h1 class="header-title">Routing Rules</h1>
+                    <button class="btn btn-primary" onclick="openModal('addRuleModal')">Add Rule</button>
+                </div>
+                
+                <div id="routing-rules">
+                    <div class="loading">Loading rules...</div>
+                </div>
+            </div>
+
+            <!-- Providers Tab -->
+            <div id="providers" class="tab-content">
+                <div class="header glass">
+                    <h1 class="header-title">AI Providers</h1>
+                    <button class="btn btn-primary" onclick="openModal('addProviderModal')">Add Provider</button>
+                </div>
+                
+                <div id="providers-list">
+                    <div class="loading">Loading providers...</div>
+                </div>
+            </div>
+
+            <!-- Settings Tab -->
+            <div id="settings" class="tab-content">
+                <div class="header glass">
+                    <h1 class="header-title">Settings</h1>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px;">
+                    <div class="card glass">
+                        <h3>&#127912; Appearance</h3>
+                        
+                        <div style="margin-top: 20px;">
+                            <label class="form-label">Theme</label>
+                            
+                            <div style="display: flex; gap: 12px;">
+                                <button class="btn btn-secondary" onclick="setTheme('dark')">Dark</button>
+                                <button class="btn btn-secondary" onclick="setTheme('light')">Light</button>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 20px;">
+                            <label class="form-label">Accent Color</label>
+                            
+                            <div style="display: flex; gap: 12px;">
+                                <button onclick="setAccentColor('#00f0ff')" style="width: 40px; height: 40px; border-radius: 50%; background: #00f0ff; border: 2px solid white; cursor: pointer;"></button>
+                                <button onclick="setAccentColor('#ff00aa')" style="width: 40px; height: 40px; border-radius: 50%; background: #ff00aa; border: 2px solid transparent; cursor: pointer;"></button>
+                                <button onclick="setAccentColor('#aa00ff')" style="width: 40px; height: 40px; border-radius: 50%; background: #aa00ff; border: 2px solid transparent; cursor: pointer;"></button>
+                                <button onclick="setAccentColor('#ffaa00')" style="width: 40px; height: 40px; border-radius: 50%; background: #ffaa00; border: 2px solid transparent; cursor: pointer;"></button>
+                            </div>
+                        </div>
+                        
+                        
+                        <div style="margin-top: 20px;">
+                            <label class="form-label">Custom Background</label>
+                            
+                            <input type="file" id="bgUpload" accept="image/*" onchange="uploadBackground()" style="display: none;">
+                            
+                            <button class="btn btn-secondary" onclick="document.getElementById('bgUpload').click()">Upload Image</button>
+                            
+                            <button class="btn btn-secondary" onclick="clearBackground()" style="margin-left: 8px;">Clear</button>
+                        </div>
+                    </div>
+
+                    <div class="card glass">
+                        <h3>&#128736; Debug Tools</h3>
+                        
+                        <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 12px;">
+                            <button class="btn btn-secondary" onclick="toggleDebugPanel()">Toggle Debug Panel</button>
+                            
+                            <button class="btn btn-secondary" onclick="testAPI()">Test API Connection</button>
+                            
+                            <button class="btn btn-secondary" onclick="clearCache()">Clear Local Cache</button>
+                            
+                            <button class="btn btn-secondary" onclick="showSystemInfo()">System Info</button>
+                        </div>
+                    </div>
+
+                    <div class="card glass">
+                        <h3>&#128100; Account</h3>
+                        
+                        <div style="margin-top: 20px;">
+                            <p style="color: var(--text-secondary); margin-bottom: 16px;">Manage your account settings.</p>
+                            
+                            <button class="btn btn-secondary" onclick="logout()">Logout</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Floating Action Button -->
+    <button class="fab" onclick="openQuickActions()" data-tooltip="Quick Actions">+</button>
+
+    <!-- Debug Panel -->
+    <div class="debug-panel glass" id="debugPanel">
+        <div class="debug-header">
+            <span class="debug-title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+                Debug Console
+            </span>
+            
+            <button class="btn btn-small btn-secondary" onclick="toggleDebugPanel()">&#10005;</button>
+        </div>
+        
+        <div class="debug-content">
+            <div class="debug-log" id="debugLog">
+                <div class="debug-log-entry info">Debug panel initialized</div>
+            </div>
+            
+            <div style="margin-top: 16px;">
+                <button class="btn btn-small btn-secondary debug-btn" onclick="testAllEndpoints()">Test All Endpoints</button>
+                <button class="btn btn-small btn-secondary debug-btn" onclick="simulateActivity()">Simulate Activity</button>
+                <button class="btn btn-small btn-secondary debug-btn" onclick="clearDebugLog()">Clear Log</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Rule Modal -->
+    <div class="modal-overlay" id="addRuleModal">
+        <div class="modal glass">
+            <h2 class="modal-title">Add Routing Rule</h2>
+            
+            <div class="form-group">
+                <label class="form-label">Rule Name</label>
+                <input type="text" class="form-input" id="ruleName" placeholder="e.g., Urgent Messages">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Condition Type</label>
+                <select class="form-input" id="ruleConditionType">
+                    <option value="contains">Contains keyword</option>
+                    <option value="starts_with">Starts with</option>
+                    <option value="keyword">Has keyword</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Keywords (comma separated)</label>
+                <input type="text" class="form-input" id="ruleKeywords" placeholder="urgent, asap, emergency">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Send To Channel</label>
+                <select class="form-input" id="ruleChannel">
+                    <option value="discord">Discord</option>
+                    <option value="telegram">Telegram</option>
+                    <option value="slack">Slack</option>
+                    <option value="email">Email</option>
+                    <option value="sms">SMS</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Destination</label>
+                <input type="text" class="form-input" id="ruleDestination" placeholder="Webhook URL, email, or phone">
+            </div>
+            
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeModal('addRuleModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="addRule()">Create Rule</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Provider Modal -->
+    <div class="modal-overlay" id="addProviderModal">
+        <div class="modal glass">
+            <h2 class="modal-title">Add AI Provider</h2>
+            
+            <div class="form-group">
+                <label class="form-label">Provider</label>
+                <select class="form-input" id="providerType">
+                    <option value="openai">OpenAI</option>
+                    <option value="anthropic">Anthropic Claude</option>
+                    <option value="google">Google Gemini</option>
+                    <option value="mistral">Mistral AI</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Label (optional)</label>
+                <input type="text" class="form-input" id="providerLabel" placeholder="My OpenAI Key">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">API Key</label>
+                <input type="password" class="form-input" id="providerApiKey" placeholder="sk-...">
+            </div>
+            
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeModal('addProviderModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="addProvider()">Add Provider</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Keyboard Shortcuts Modal -->
+    <div class="modal-overlay" id="shortcutsModal">
+        <div class="modal glass">
+            <h2 class="modal-title">Keyboard Shortcuts</h2>
+            
+            <div style="display: grid; gap: 12px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--glass-bg); border-radius: 8px;">
+                    <span>Toggle Sidebar</span>
+                    <span class="kbd">Ctrl + B</span>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--glass-bg); border-radius: 8px;">
+                    <span>Refresh Data</span>
+                    <span class="kbd">Ctrl + R</span>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--glass-bg); border-radius: 8px;">
+                    <span>Toggle Theme</span>
+                    <span class="kbd">Ctrl + T</span>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--glass-bg); border-radius: 8px;">
+                    <span>Open Debug Panel</span>
+                    <span class="kbd">Ctrl + D</span>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--glass-bg); border-radius: 8px;">
+                    <span>Logout</span>
+                    <span class="kbd">Ctrl + L</span>
+                </div>
+            </div>
+            
+            <div class="modal-actions">
+                <button class="btn btn-primary" onclick="closeModal('shortcutsModal')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ... [Continue with all the JavaScript from before plus new features]
+        const API_URL = 'http://localhost:3000/api/v1';
+        let authToken = localStorage.getItem('aria_token') || '';
+        let currentMonth = new Date();
+        let debugMode = false;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            if (authToken) {
+                showMainApp();
+            }
+            loadTheme();
+            updateClock();
+            setInterval(updateClock, 1000);
+            generateCalendar();
+        });
+
+        // Theme Management
+        function loadTheme() {
+            const theme = localStorage.getItem('aria_theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', theme);
+            updateThemeIcon(theme);
+        }
+
+        function toggleTheme() {
+            const current = document.documentElement.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('aria_theme', next);
+            updateThemeIcon(next);
+            showToast(`Switched to ${next} mode`, 'success');
+        }
+
+        function setTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('aria_theme', theme);
+            updateThemeIcon(theme);
+        }
+
+        function updateThemeIcon(theme) {
+            const icon = document.getElementById('themeIcon');
+            if (theme === 'dark') {
+                icon.innerHTML = `
+                    <circle cx="12" cy="12" r="5"/>
+                    <line x1="12" y1="1" x2="12" y2="3"/>
+                    <line x1="12" y1="21" x2="12" y2="23"/>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                    <line x1="1" y1="12" x2="3" y2="12"/>
+                    <line x1="21" y1="12" x2="23" y2="12"/>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                `;
+            } else {
+                icon.innerHTML = `
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                `;
+            }
+        }
+
+        // Accent Color
+        function setAccentColor(color) {
+            document.documentElement.style.setProperty('--accent-primary', color);
+            localStorage.setItem('aria_accent', color);
+            showToast('Accent color updated', 'success');
+        }
+
+        // Background Image
+        function uploadBackground() {
+            const input = document.getElementById('bgUpload');
+            const file = input.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    document.body.style.backgroundImage = `url(${e.target.result})`;
+                    document.body.classList.add('custom-bg');
+                    localStorage.setItem('aria_bg', e.target.result);
+                    showToast('Background updated', 'success');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function clearBackground() {
+            document.body.style.backgroundImage = '';
+            document.body.classList.remove('custom-bg');
+            localStorage.removeItem('aria_bg');
+            showToast('Background cleared', 'success');
+        }
+
+        // Clock Widget
+        function updateClock() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
+            const dateStr = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+            
+            // Update if clock element exists
+            const clockEl = document.getElementById('widgetClock');
+            if (clockEl) clockEl.textContent = timeStr;
+            
+            const dateEl = document.getElementById('widgetDate');
+            if (dateEl) dateEl.textContent = dateStr;
+        }
+
+        // Calendar
+        function generateCalendar() {
+            const grid = document.getElementById('calendarGrid');
+            if (!grid) return;
+            
+            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            const year = currentMonth.getFullYear();
+            const month = currentMonth.getMonth();
+            
+            document.getElementById('currentMonth').textContent = 
+                currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+            
+            let html = days.map(d => `<div class="calendar-day-header">${d}</div>`).join('');
+            
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            
+            for (let i = 0; i < firstDay; i++) {
+                html += '<div class="calendar-day"></div>';
+            }
+            
+            for (let day = 1; day <= daysInMonth; day++) {
+                const isToday = day === new Date().getDate() && month === new Date().getMonth();
+                html += `
+                    <div class="calendar-day ${isToday ? 'active' : ''}" onclick="selectDate(${day})">
+                        <span class="calendar-day-number">${day}</span>
+                    </div>
+                `;
+            }
+            
+            grid.innerHTML = html;
+        }
+
+        function changeMonth(delta) {
+            currentMonth.setMonth(currentMonth.getMonth() + delta);
+            generateCalendar();
+        }
+
+        function selectDate(day) {
+            showToast(`Selected ${currentMonth.toLocaleDateString('en-US', { month: 'short' })} ${day}`, 'info');
+        }
+
+        // Debug Panel
+        function toggleDebugPanel() {
+            const panel = document.getElementById('debugPanel');
+            panel.classList.toggle('active');
+            debugMode = panel.classList.contains('active');
+        }
+
+        function logDebug(message, type = 'info') {
+            const log = document.getElementById('debugLog');
+            const entry = document.createElement('div');
+            entry.className = `debug-log-entry ${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            log.appendChild(entry);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        function clearDebugLog() {
+            document.getElementById('debugLog').innerHTML = '';
+        }
+
+        async function testAllEndpoints() {
+            logDebug('Testing all endpoints...', 'info');
+            
+            const endpoints = ['/health', '/user/profile', '/conversations', '/routes', '/providers'];
+            
+            for (const endpoint of endpoints) {
+                try {
+                    const result = await fetchAPI(endpoint);
+                    logDebug(`${endpoint}: ${result ? 'OK' : 'FAILED'}`, result ? 'success' : 'error');
+                } catch (e) {
+                    logDebug(`${endpoint}: ERROR - ${e.message}`, 'error');
+                }
+            }
+        }
+
+        function simulateActivity() {
+            const activities = [
+                { text: 'New conversation created', type: 'success' },
+                { text: 'AI response generated', type: 'info' },
+                { text: 'Message routed to Discord', type: 'success' },
+                { text: 'API call completed', type: 'info' }
+            ];
+            
+            const activity = activities[Math.floor(Math.random() * activities.length)];
+            addActivity(activity.text, activity.type);
+            logDebug(`Simulated: ${activity.text}`, activity.type);
+        }
+
+        function showSystemInfo() {
+            const info = {
+                'User Agent': navigator.userAgent,
+                'Screen': `${screen.width}x${screen.height}`,
+                'Theme': document.documentElement.getAttribute('data-theme'),
+                'Token': authToken ? 'Present' : 'Missing',
+                'API URL': API_URL
+            };
+            
+            Object.entries(info).forEach(([key, value]) => {
+                logDebug(`${key}: ${value}`, 'info');
+            });
+        }
+
+        // Toast Notifications
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Activity Feed
+        function addActivity(text, type = 'info') {
+            const feed = document.getElementById('activityFeed');
+            const icons = { success: '&#10003;', error: '&#10007;', info: '&#8505;' };
+            
+            const item = document.createElement('div');
+            item.className = 'activity-item';
+            item.innerHTML = `
+                <div class="activity-icon ${type}">${icons[type]}</div>
+                <div class="activity-content">
+                    <div class="activity-text">${text}</div>
+                    <div class="activity-time">Just now</div>
+                </div>
+            `;
+            
+            feed.insertBefore(item, feed.firstChild);
+            if (feed.children.length > 10) feed.lastChild.remove();
+        }
+
+        // Keyboard Shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey || e.metaKey) {
+                switch(e.key.toLowerCase()) {
+                    case 'b':
+                        e.preventDefault();
+                        toggleSidebar();
+                        break;
+                    case 'r':
+                        e.preventDefault();
+                        refreshData();
+                        break;
+                    case 't':
+                        e.preventDefault();
+                        toggleTheme();
+                        break;
+                    case 'd':
+                        e.preventDefault();
+                        toggleDebugPanel();
+                        break;
+                    case 'l':
+                        e.preventDefault();
+                        logout();
+                        break;
+                }
+            }
+        });
+
+        // Rest of the functions from previous version...
+        function toggleAuthMode() {
+            document.getElementById('loginForm').classList.toggle('hidden');
+            document.getElementById('registerForm').classList.toggle('hidden');
+            document.getElementById('loginError').classList.add('hidden');
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('loginError');
+            errorDiv.textContent = message;
+            errorDiv.classList.remove('hidden');
+        }
+
+        function showMainApp() {
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+            loadStats();
+            loadRecentConversations();
+        }
+
+        function showLoginScreen() {
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('mainApp').classList.add('hidden');
+            authToken = '';
+            localStorage.removeItem('aria_token');
+        }
+
+        async function login() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            if (!email || !password) {
+                showError('Please enter email and password');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    showError(data.message || 'Login failed');
+                    return;
+                }
+
+                authToken = data.token;
+                localStorage.setItem('aria_token', authToken);
+                showMainApp();
+                showToast('Welcome back!', 'success');
+            } catch (error) {
+                showError('Network error. Is the server running?');
+            }
+        }
+
+        async function register() {
+            const name = document.getElementById('regName').value;
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+
+            if (!email || !password) {
+                showError('Please fill in all fields');
+                return;
+            }
+
+            if (password.length < 8) {
+                showError('Password must be at least 8 characters');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, password })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    showError(data.message || 'Registration failed');
+                    return;
+                }
+
+                authToken = data.token;
+                localStorage.setItem('aria_token', authToken);
+                showMainApp();
+                showToast('Account created!', 'success');
+            } catch (error) {
+                showError('Network error. Is the server running?');
+            }
+        }
+
+        function logout() {
+            showLoginScreen();
+            showToast('Logged out', 'info');
+        }
+
+        async function fetchAPI(endpoint, options = {}) {
+            const headers = { 'Content-Type': 'application/json', ...options.headers };
+            if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
+            
+            try {
+                const response = await fetch(`${API_URL}${endpoint}`, { ...options, headers });
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        showLoginScreen();
+                        throw new Error('Session expired');
+                    }
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                return await response.json();
+            } catch (error) {
+                console.error('API Error:', error);
+                if (debugMode) logDebug(`API Error: ${error.message}`, 'error');
+                return null;
+            }
+        }
+
+        // Tab switching
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                const tabName = item.getAttribute('data-tab');
+                showTab(tabName);
+                document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+                item.classList.add('active');
+                
+                // Update breadcrumb
+                document.getElementById('breadcrumb-current').textContent = 
+                    tabName.charAt(0).toUpperCase() + tabName.slice(1);
+            });
+        });
+
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            
+            if (tabName === 'conversations') loadConversations();
+            if (tabName === 'routing') loadRoutingRules();
+            if (tabName === 'providers') loadProviders();
+            if (tabName === 'analytics') loadAnalytics();
+            if (tabName === 'calendar') generateCalendar();
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('collapsed');
+        }
+
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) overlay.classList.remove('active');
+            });
+        });
+
+        async function addRule() {
+            const name = document.getElementById('ruleName').value;
+            const conditionType = document.getElementById('ruleConditionType').value;
+            const keywords = document.getElementById('ruleKeywords').value.split(',').map(k => k.trim());
+            const channel = document.getElementById('ruleChannel').value;
+            const destination = document.getElementById('ruleDestination').value;
+
+            if (!name || !keywords.length || !destination) {
+                showToast('Please fill in all fields', 'error');
+                return;
+            }
+
+            const result = await fetchAPI('/routes', {
+                method: 'POST',
+                body: JSON.stringify({
+                    name,
+                    conditions: [{ type: conditionType, value: keywords.join(',') }],
+                    actions: [{ channel, destination }],
+                    priority: 0
+                })
+            });
+
+            if (result) {
+                closeModal('addRuleModal');
+                loadRoutingRules();
+                loadStats();
+                showToast('Rule created!', 'success');
+                addActivity(`Created rule: ${name}`, 'success');
+            }
+        }
+
+        async function addProvider() {
+            const provider = document.getElementById('providerType').value;
+            const label = document.getElementById('providerLabel').value;
+            const apiKey = document.getElementById('providerApiKey').value;
+
+            if (!apiKey) {
+                showToast('Please enter an API key', 'error');
+                return;
+            }
+
+            const result = await fetchAPI('/providers', {
+                method: 'POST',
+                body: JSON.stringify({ provider, label, apiKey })
+            });
+
+            if (result) {
+                closeModal('addProviderModal');
+                loadProviders();
+                showToast('Provider added!', 'success');
+                addActivity(`Added provider: ${provider}`, 'success');
+            }
+        }
+
+        async function toggleRule(ruleId) {
+            const result = await fetchAPI(`/routes/${ruleId}/toggle`, { method: 'PATCH' });
+            if (result) {
+                loadRoutingRules();
+                showToast(`Rule ${result.isEnabled ? 'enabled' : 'disabled'}`, 'success');
+            }
+        }
+
+        async function deleteRule(ruleId) {
+            if (!confirm('Delete this rule?')) return;
+            
+            const result = await fetchAPI(`/routes/${ruleId}`, { method: 'DELETE' });
+            if (result) {
+                loadRoutingRules();
+                loadStats();
+                showToast('Rule deleted', 'success');
+            }
+        }
+
+        async function deleteProvider(providerId) {
+            if (!confirm('Remove this provider?')) return;
+            
+            const result = await fetchAPI(`/providers/${providerId}`, { method: 'DELETE' });
+            if (result) {
+                loadProviders();
+                showToast('Provider removed', 'success');
+            }
+        }
+
+        async function deleteConversation(convId) {
+            if (!confirm('Delete this conversation?')) return;
+            
+            await fetchAPI(`/conversations/${convId}`, { method: 'DELETE' });
+            loadConversations();
+        }
+
+        async function deleteAllConversations() {
+            if (!confirm('Delete ALL conversations?')) return;
+            
+            await fetchAPI('/conversations', { method: 'DELETE' });
+            loadConversations();
+            loadStats();
+            showToast('All conversations deleted', 'success');
+        }
+
+        async function loadStats() {
+            const usage = await fetchAPI('/user/usage');
+            const rules = await fetchAPI('/routes');
+            
+            document.getElementById('stat-total').textContent = usage?.totalConversations || '0';
+            document.getElementById('stat-month').textContent = usage?.monthlyConversations || '0';
+            document.getElementById('stat-latency').textContent = '1.2s';
+            document.getElementById('stat-rules').textContent = rules?.routes?.length || '0';
+        }
+
+        async function loadRecentConversations() {
+            const container = document.getElementById('recent-conversations');
+            const data = await fetchAPI('/conversations?limit=5');
+            
+            if (!data?.conversations?.length) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">&#128172;</div><div class="empty-state-title">No conversations yet</div><p>Start using ARIA to see them here!</p></div>';
+                return;
+            }
+            
+            container.innerHTML = data.conversations.map(conv => `
+                <div class="conversation-item">
+                    <div class="conversation-icon">&#127908;</div>
+                    <div class="conversation-content">
+                        <div class="conversation-query">${escapeHtml(conv.transcript?.substring(0, 100) || '')}${conv.transcript?.length > 100 ? '...' : ''}</div>
+                        <div class="conversation-response">${escapeHtml(conv.aiResponse?.substring(0, 150) || '')}${conv.aiResponse?.length > 150 ? '...' : ''}</div>
+                        <div class="conversation-meta">
+                            <span>${formatDate(conv.createdAt)}</span>
+                            <span>${conv.modelUsed}</span>
+                            <span>${conv.latencyMs}ms</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function loadConversations() {
+            const container = document.getElementById('all-conversations');
+            const data = await fetchAPI('/conversations');
+            
+            if (!data?.conversations?.length) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">&#128172;</div><div class="empty-state-title">No conversations found</div></div>';
+                return;
+            }
+            
+            container.innerHTML = data.conversations.map(conv => `
+                <div class="conversation-item">
+                    <div class="conversation-icon">&#127908;</div>
+                    <div class="conversation-content">
+                        <div class="conversation-query">${escapeHtml(conv.transcript)}</div>
+                        <div class="conversation-response">${escapeHtml(conv.aiResponse)}</div>
+                        <div class="conversation-meta">
+                            <span>${formatDate(conv.createdAt)}</span>
+                            <button class="btn btn-small btn-danger" onclick="deleteConversation('${conv.id}')">Delete</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function loadRoutingRules() {
+            const container = document.getElementById('routing-rules');
+            const data = await fetchAPI('/routes');
+            
+            if (!data?.routes?.length) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">&#128736;</div><div class="empty-state-title">No routing rules</div><p>Create your first rule!</p></div>';
+                return;
+            }
+            
+            container.innerHTML = data.rules.map(rule => `
+                <div class="rule-item">
+                    <div class="toggle-switch ${rule.isEnabled ? 'active' : ''}" onclick="toggleRule('${rule.id}')"></div>
+                    <div class="rule-info">
+                        <div class="rule-name">${escapeHtml(rule.name)}</div>
+                        <div class="rule-description">${rule.conditions?.length || 0} conditions • ${rule.actions?.length || 0} actions</div>
+                    </div>
+                    <button class="delete-btn" onclick="deleteRule('${rule.id}')">&#128465;</button>
+                </div>
+            `).join('');
+        }
+
+        async function loadProviders() {
+            const container = document.getElementById('providers-list');
+            const data = await fetchAPI('/providers/configured');
+            
+            if (!data?.providers?.length) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">&#128187;</div><div class="empty-state-title">No providers</div><p>Add your first AI provider!</p></div>';
+                return;
+            }
+            
+            container.innerHTML = data.providers.map(provider => `
+                <div class="provider-item">
+                    <div class="provider-info">
+                        <div class="provider-name">${escapeHtml(provider.label || provider.provider)}</div>
+                        <div class="provider-status" style="color: var(--success);">&#9679; Connected</div>
+                    </div>
+                    <button class="delete-btn" onclick="deleteProvider('${provider.id}')">&#128465;</button>
+                </div>
+            `).join('');
+        }
+
+        async function loadAnalytics() {
+            const container = document.getElementById('analytics-content');
+            const usage = await fetchAPI('/user/usage');
+            
+            if (!usage) {
+                container.innerHTML = '<div class="empty-state">No analytics data available.</div>';
+                return;
+            }
+            
+            container.innerHTML = `
+                <div class="stats-grid" style="grid-template-columns: repeat(3, 1fr);">
+                    <div class="stat-card glass">
+                        <div class="stat-label">Total Conversations</div>
+                        <div class="stat-value">${usage.totalConversations || 0}</div>
+                    </div>
+                    <div class="stat-card glass">
+                        <div class="stat-label">This Month</div>
+                        <div class="stat-value">${usage.monthlyConversations || 0}</div>
+                    </div>
+                    <div class="stat-card glass">
+                        <div class="stat-label">Total Messages</div>
+                        <div class="stat-value">${usage.totalMessages || 0}</div>
+                    </div>
+                </div>
+                ${usage.routingStats?.length ? `
+                <h3 style="margin-top: 32px; margin-bottom: 16px;">Routing by Channel</h3>
+                <div class="stats-grid">
+                    ${usage.routingStats.map(stat => `
+                        <div class="stat-card glass">
+                            <div class="stat-label">${escapeHtml(stat.channel)}</div>
+                            <div class="stat-value">${stat.count}</div>
+                        </div>
+                    `).join('')}
+                </div>
+                ` : ''}
+            `;
+        }
+
+        function refreshData() {
+            loadStats();
+            loadRecentConversations();
+            showToast('Data refreshed', 'success');
+            addActivity('Data refreshed manually', 'info');
+        }
+
+        function showNotifications() {
+            showToast('3 new notifications', 'info');
+            document.getElementById('notifBadge').style.display = 'none';
+        }
+
+        function showKeyboardShortcuts() {
+            openModal('shortcutsModal');
+        }
+
+        function openQuickActions() {
+            showToast('Quick actions: Press Ctrl+T for theme, Ctrl+R to refresh', 'info');
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return 'Unknown';
+            return new Date(dateString).toLocaleString();
+        }
+    </script>
+</body>
+</html>

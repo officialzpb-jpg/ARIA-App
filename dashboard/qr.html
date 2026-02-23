@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARIA Mobile QR Code</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0a0f;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            text-align: center;
+            max-width: 400px;
+        }
+        h1 {
+            color: #00f0ff;
+            margin-bottom: 10px;
+        }
+        p {
+            color: #8e8e93;
+            margin-bottom: 30px;
+        }
+        #qrcode {
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-bottom: 30px;
+        }
+        .url-box {
+            background: #1c1c1e;
+            padding: 15px 20px;
+            border-radius: 12px;
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 14px;
+            color: #00f0ff;
+            margin-bottom: 20px;
+        }
+        .instructions {
+            background: #1c1c1e;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: left;
+        }
+        .instructions h3 {
+            margin-top: 0;
+            color: #00f0ff;
+        }
+        .instructions ol {
+            padding-left: 20px;
+            color: #8e8e93;
+        }
+        .instructions li {
+            margin-bottom: 10px;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            background: #1c1c1e;
+            border: 1px solid #333;
+            border-radius: 8px;
+            color: white;
+            font-size: 14px;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+        }
+        button {
+            background: linear-gradient(135deg, #00f0ff 0%, #00c4cc 100%);
+            color: #0a0a0f;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>&#9672; ARIA Mobile</h1>
+        <p>Scan this QR code with your phone to open the mobile app</p>
+
+        <div id="qrcode"></div>
+
+        <div class="url-box" id="urlDisplay">
+            Enter your IP address below
+        </div>
+
+        <input type="text" id="ipInput" placeholder="192.168.1.100" value="">
+        <button onclick="generateQR()">Generate QR Code</button>
+
+        <div class="instructions">
+            <h3>How to find your IP:</h3>
+            <ol>
+                <li>Open Command Prompt on your PC</li>
+                <li>Type: <strong>ipconfig</strong></li>
+                <li>Look for "IPv4 Address"</li>
+                <li>Enter it above and click Generate</li>
+                <li>Scan the QR code with your phone camera</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        function generateQR() {
+            const ip = document.getElementById('ipInput').value.trim();
+            
+            if (!ip) {
+                alert('Please enter your IP address');
+                return;
+            }
+
+            const url = `http://${ip}:3000/mobile.html`;
+            
+            // Clear previous QR
+            document.getElementById('qrcode').innerHTML = '';
+            
+            // Generate new QR
+            new QRCode(document.getElementById('qrcode'), {
+                text: url,
+                width: 256,
+                height: 256,
+                colorDark: '#000000',
+                colorLight: '#ffffff',
+                correctLevel: QRCode.CorrectLevel.H
+            });
+
+            // Update URL display
+            document.getElementById('urlDisplay').textContent = url;
+        }
+
+        // Auto-generate if IP is in URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const autoIP = urlParams.get('ip');
+        if (autoIP) {
+            document.getElementById('ipInput').value = autoIP;
+            generateQR();
+        }
+    </script>
+</body>
+</html>
