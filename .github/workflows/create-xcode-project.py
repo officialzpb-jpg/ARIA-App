@@ -10,30 +10,39 @@ os.makedirs('ios/ARIA', exist_ok=True)
 os.makedirs('ios/ARIA.xcodeproj', exist_ok=True)
 os.makedirs('ios/ARIA/Assets.xcassets/AppIcon.appiconset', exist_ok=True)
 
-# Create main.swift - must use AppDelegate pattern for this structure
+# Create main.swift - simple UIKit app without SwiftUI
 main_swift = '''import UIKit
-import SwiftUI
+
+class ViewController: UIViewController {
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        view.backgroundColor = .systemBackground
+        
+        let label = UILabel()
+        label.text = "ARIA"
+        label.font = UIFont.systemFont(ofSize: 48, weight: .bold)
+        label.textAlignment = .center
+        label.translatesAutoresizingMaskIntoConstraints = false
+        
+        view.addSubview(label)
+        
+        NSLayoutConstraint.activate([
+            label.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            label.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+        ])
+    }
+}
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        let window = UIWindow(frame: UIScreen.main.bounds)
-        window.rootViewController = UIHostingController(rootView: ContentView())
-        self.window = window
-        window.makeKeyAndVisible()
+        window = UIWindow(frame: UIScreen.main.bounds)
+        window?.rootViewController = ViewController()
+        window?.makeKeyAndVisible()
         return true
-    }
-}
-
-struct ContentView: View {
-    var body: some View {
-        VStack {
-            Text("ARIA")
-                .font(.largeTitle)
-            Text("Hello World")
-        }
     }
 }
 '''
