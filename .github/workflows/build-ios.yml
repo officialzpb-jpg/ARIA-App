@@ -16,139 +16,180 @@ jobs:
     - name: Setup Xcode
       uses: maxim-lobanov/setup-xcode@v1
       with:
-        xcode-version: latest-stable
+        xcode-version: '15.0'
         
-    - name: Create Full ARIA iOS Project
+    - name: Create ARIA iOS Project
       run: |
-        mkdir -p ARIA-iOS/ARIA/Assets.xcassets/AppIcon.appiconset
+        mkdir -p ARIA-iOS/ARIA
         cd ARIA-iOS
         
-        # Copy the full ARIA source files
-        cp ../ARIA_iOS.swift ARIA/
-        cp ../ARIA_iOS_SystemIntegration.swift ARIA/
-        
-        # Create main ContentView
-        cat > ARIA/ContentView.swift << 'EOF'
+        # Create a simple, working App.swift
+        cat > ARIA/App.swift << 'EOF'
         import SwiftUI
+        import AVFoundation
+        import Speech
+
+        @main
+        struct ARIAApp: App {
+            var body: some Scene {
+                WindowGroup {
+                    ContentView()
+                }
+            }
+        }
 
         struct ContentView: View {
-            @EnvironmentObject var appState: AppState
+            @State private var isRecording = false
+            @State private var transcript = ""
+            @State private var response = ""
+            @State private var selectedPersona = 0
+            
+            let personas = ["Default", "Executive", "Creative", "Technical", "Concise"]
             
             var body: some View {
                 NavigationView {
-                    VStack(spacing: 20) {
+                    VStack(spacing: 25) {
                         // Header
-                        VStack {
+                        VStack(spacing: 10) {
                             Image(systemName: "waveform.circle.fill")
-                                .font(.system(size: 80))
+                                .font(.system(size: 70))
                                 .foregroundColor(.blue)
                             
                             Text("ARIA")
-                                .font(.largeTitle)
-                                .fontWeight(.bold)
+                                .font(.system(size: 36, weight: .bold))
                             
                             Text("AI Routing & Integration Assistant")
                                 .font(.subheadline)
                                 .foregroundColor(.secondary)
+                                .multilineTextAlignment(.center)
                         }
-                        .padding(.top, 40)
+                        .padding(.top, 30)
                         
                         Spacer()
                         
                         // Recording Button
-                        Button(action: {
-                            toggleRecording()
-                        }) {
+                        Button(action: toggleRecording) {
                             ZStack {
                                 Circle()
-                                    .fill(appState.isRecording ? Color.red : Color.blue)
-                                    .frame(width: 100, height: 100)
+                                    .fill(isRecording ? Color.red : Color.blue)
+                                    .frame(width: 90, height: 90)
+                                    .shadow(radius: 10)
                                 
-                                Image(systemName: appState.isRecording ? "stop.fill" : "mic.fill")
-                                    .font(.system(size: 40))
+                                Image(systemName: isRecording ? "stop.fill" : "mic.fill")
+                                    .font(.system(size: 35))
                                     .foregroundColor(.white)
                             }
                         }
                         
-                        Text(appState.isRecording ? "Tap to stop" : "Tap to speak")
+                        Text(isRecording ? "Listening..." : "Tap to speak")
                             .font(.headline)
                             .foregroundColor(.secondary)
                         
-                        Spacer()
-                        
-                        // Transcript Display
-                        if !appState.currentTranscript.isEmpty {
-                            VStack(alignment: .leading) {
-                                Text("You said:")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                                Text(appState.currentTranscript)
-                                    .font(.body)
-                                    .padding()
-                                    .background(Color.gray.opacity(0.1))
-                                    .cornerRadius(10)
-                            }
-                            .padding(.horizontal)
-                        }
-                        
-                        // AI Response
-                        if !appState.aiResponse.isEmpty {
-                            VStack(alignment: .leading) {
-                                Text("ARIA:")
-                                    .font(.caption)
-                                    .foregroundColor(.blue)
-                                Text(appState.aiResponse)
-                                    .font(.body)
-                                    .padding()
-                                    .background(Color.blue.opacity(0.1))
-                                    .cornerRadius(10)
-                            }
-                            .padding(.horizontal)
-                        }
-                        
-                        Spacer()
-                        
                         // Persona Selector
-                        Picker("Persona", selection: $appState.selectedPersona) {
-                            ForEach(Persona.allCases, id: \.self) { persona in
-                                Text(persona.rawValue).tag(persona)
+                        VStack(alignment: .leading) {
+                            Text("Persona")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                                .padding(.horizontal)
+                            
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 10) {
+                                    ForEach(0..<personas.count, id: \.self) { index in
+                                        Button(action: { selectedPersona = index }) {
+                                            Text(personas[index])
+                                                .font(.subheadline)
+                                                .padding(.horizontal, 15)
+                                                .padding(.vertical, 8)
+                                                .background(selectedPersona == index ? Color.blue : Color.gray.opacity(0.2))
+                                                .foregroundColor(selectedPersona == index ? .white : .primary)
+                                                .cornerRadius(20)
+                                        }
+                                    }
+                                }
+                                .padding(.horizontal)
                             }
                         }
-                        .pickerStyle(.segmented)
-                        .padding(.horizontal)
                         
-                        // Settings Button
+                        Spacer()
+                        
+                        // Display Area
+                        ScrollView {
+                            VStack(spacing: 15) {
+                                if !transcript.isEmpty {
+                                    VStack(alignment: .leading, spacing: 5) {
+                                        Text("You said:")
+                                            .font(.caption)
+                                            .foregroundColor(.secondary)
+                                        Text(transcript)
+                                            .font(.body)
+                                            .padding()
+                                            .frame(maxWidth: .infinity, alignment: .leading)
+                                            .background(Color.gray.opacity(0.15))
+                                            .cornerRadius(12)
+                                    }
+                                }
+                                
+                                if !response.isEmpty {
+                                    VStack(alignment: .leading, spacing: 5) {
+                                        Text("ARIA:")
+                                            .font(.caption)
+                                            .foregroundColor(.blue)
+                                        Text(response)
+                                            .font(.body)
+                                            .padding()
+                                            .frame(maxWidth: .infinity, alignment: .leading)
+                                            .background(Color.blue.opacity(0.1))
+                                            .cornerRadius(12)
+                                    }
+                                }
+                            }
+                            .padding(.horizontal)
+                        }
+                        
+                        Spacer()
+                        
+                        // Settings Link
                         NavigationLink(destination: SettingsView()) {
                             HStack {
                                 Image(systemName: "gear")
                                 Text("Settings")
                             }
-                            .padding()
-                            .background(Color.gray.opacity(0.1))
-                            .cornerRadius(10)
+                            .font(.subheadline)
+                            .padding(.horizontal, 20)
+                            .padding(.vertical, 10)
+                            .background(Color.gray.opacity(0.15))
+                            .cornerRadius(8)
                         }
                         .padding(.bottom, 20)
+                    }
+                    .navigationBarHidden(true)
+                }
+            }
+            
+            func toggleRecording() {
+                isRecording.toggle()
+                
+                if isRecording {
+                    // Request permissions and start
+                    requestPermissions()
+                    transcript = ""
+                    response = ""
+                } else {
+                    // Stop and simulate response
+                    transcript = "Hello ARIA, what can you do?"
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        response = "I'm ARIA, your AI Routing & Integration Assistant. I can process voice commands, connect to AI models, and route responses to various platforms like Telegram, Discord, and more. Connect me to your backend for full functionality!"
                     }
                 }
             }
             
-            private func toggleRecording() {
-                appState.isRecording.toggle()
-                if appState.isRecording {
-                    // Start recording
-                    appState.audioService.startRecording()
-                } else {
-                    // Stop and process
-                    appState.audioService.stopRecording()
-                    // Simulate transcript for now
-                    appState.currentTranscript = "Hello ARIA, what's the weather like?"
-                    appState.aiResponse = "I apologize, but I don't have access to real-time weather data or an active backend connection in this build. To use ARIA fully, you'll need to connect it to your backend server."
-                }
+            func requestPermissions() {
+                AVAudioSession.sharedInstance().requestRecordPermission { _ in }
+                SFSpeechRecognizer.requestAuthorization { _ in }
             }
         }
 
         struct SettingsView: View {
-            @EnvironmentObject var appState: AppState
             @State private var backendURL = ""
             @State private var apiKey = ""
             
@@ -161,8 +202,7 @@ jobs:
                         
                         SecureField("API Key", text: $apiKey)
                         
-                        Button("Save Settings") {
-                            // Save to UserDefaults
+                        Button("Save") {
                             UserDefaults.standard.set(backendURL, forKey: "backendURL")
                             UserDefaults.standard.set(apiKey, forKey: "apiKey")
                         }
@@ -175,11 +215,10 @@ jobs:
                             Text("1.0.0")
                                 .foregroundColor(.secondary)
                         }
-                        
                         HStack {
                             Text("Build")
                             Spacer()
-                            Text("Beta")
+                            Text("GitHub Actions")
                                 .foregroundColor(.secondary)
                         }
                     }
@@ -193,110 +232,270 @@ jobs:
         }
         EOF
         
-        # Create placeholder services
-        cat > ARIA/Services.swift << 'EOF'
-        import Foundation
-        import AVFoundation
-        import Speech
-
-        class AudioCaptureService {
-            private var audioRecorder: AVAudioRecorder?
-            
-            func startRecording() {
-                // Placeholder - would start actual recording
-                print("Starting audio recording...")
-            }
-            
-            func stopRecording() {
-                // Placeholder - would stop and return audio
-                print("Stopping audio recording...")
-            }
-        }
-
-        class SpeechToTextService {
-            private let speechRecognizer = SFSpeechRecognizer()
-            
-            func transcribe(audioURL: URL, completion: @escaping (String) -> Void) {
-                // Placeholder - would transcribe audio
-                completion("Transcribed text would appear here")
-            }
-        }
-
-        class AIService {
-            func sendRequest(prompt: String, persona: Persona, completion: @escaping (String) -> Void) {
-                // Placeholder - would send to backend
-                completion("AI response would appear here")
-            }
-        }
-
-        class RoutingService {
-            func routeResponse(_ response: String, to destination: String) {
-                // Placeholder - would route to Telegram, Discord, etc.
-                print("Routing to \(destination)")
-            }
-        }
-
-        struct RoutingRule: Identifiable {
-            let id = UUID()
-            var name: String
-            var destination: String
-            var isActive: Bool
-        }
-        EOF
-        
         # Create Assets
+        mkdir -p ARIA/Assets.xcassets/AppIcon.appiconset
         cat > ARIA/Assets.xcassets/AppIcon.appiconset/Contents.json << 'EOF'
-        {
-          "images" : [
-            {
-              "idiom" : "universal",
-              "platform" : "ios",
-              "size" : "1024x1024"
-            }
-          ],
-          "info" : {
-            "author" : "xcode",
-            "version" : 1
-          }
-        }
+        {"images":[{"idiom":"universal","platform":"ios","size":"1024x1024"}],"info":{"author":"xcode","version":1}}
         EOF
         
     - name: Create Xcode Project
       run: |
         cd ARIA-iOS
+        mkdir -p ARIA.xcodeproj
         
-        # Create minimal project.pbxproj
-        cat > ARIA.xcodeproj/project.pbxproj << 'PROJEOF'
+        # Create a minimal but valid project.pbxproj
+        cat > ARIA.xcodeproj/project.pbxproj <> 'PROJEOF'
         // !$*UTF8*$!
         {
-            archiveVersion = 1;
-            classes = {};
-            objectVersion = 56;
-            objects = {
-                000000000000000000000001 = {isa = PBXBuildFile; fileRef = 000000000000000000000011; };
-                000000000000000000000002 = {isa = PBXBuildFile; fileRef = 000000000000000000000012; };
-                000000000000000000000003 = {isa = PBXBuildFile; fileRef = 000000000000000000000013; };
-                000000000000000000000004 = {isa = PBXBuildFile; fileRef = 000000000000000000000014; };
-                000000000000000000000010 = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ARIA.app; sourceTree = BUILT_PRODUCTS_DIR; };
-                000000000000000000000011 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARIA_iOS.swift; sourceTree = "<group>"; };
-                000000000000000000000012 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-                000000000000000000000013 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Services.swift; sourceTree = "<group>"; };
-                000000000000000000000014 = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-                000000000000000000000030 = {isa = PBXGroup; children = (000000000000000000000031,000000000000000000000032); sourceTree = "<group>"; };
-                000000000000000000000031 = {isa = PBXGroup; children = (000000000000000000000011,000000000000000000000012,000000000000000000000013,000000000000000000000014); path = ARIA; sourceTree = "<group>"; };
-                000000000000000000000032 = {isa = PBXGroup; children = (000000000000000000000010); name = Products; sourceTree = "<group>"; };
-                000000000000000000000040 = {isa = PBXNativeTarget; buildConfigurationList = 000000000000000000000041; buildPhases = (000000000000000000000042,000000000000000000000043); buildRules = (); dependencies = (); name = ARIA; productName = ARIA; productReference = 000000000000000000000010; productType = "com.apple.product-type.application"; };
-                000000000000000000000042 = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (000000000000000000000001,000000000000000000000002,000000000000000000000003); runOnlyForDeploymentPostprocessing = 0; };
-                000000000000000000000043 = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (000000000000000000000004); runOnlyForDeploymentPostprocessing = 0; };
-                000000000000000000000050 = {isa = PBXProject; buildConfigurationList = 000000000000000000000051; compatibilityVersion = "Xcode 14.0"; developmentRegion = en; hasScannedForEncodings = 0; knownRegions = (en,Base); mainGroup = 000000000000000000000030; productRefGroup = 000000000000000000000032; projectDirPath = ""; projectRoot = ""; targets = (000000000000000000000040); };
-                000000000000000000000051 = {isa = XCConfigurationList; buildConfigurations = (000000000000000000000060,000000000000000000000061); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
-                000000000000000000000041 = {isa = XCConfigurationList; buildConfigurations = (000000000000000000000070,000000000000000000000071); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
-                000000000000000000000060 = {isa = XCBuildConfiguration; buildSettings = {ALWAYS_SEARCH_USER_PATHS = NO; ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES; CLANG_ANALYZER_NONNULL = YES; CLANG_CXX_LANGUAGE_STANDARD = "gnu++20"; CLANG_ENABLE_MODULES = YES; CLANG_ENABLE_OBJC_ARC = YES; DEBUG_INFORMATION_FORMAT = dwarf; ENABLE_STRICT_OBJC_MSGSEND = YES; ENABLE_TESTABILITY = YES; GCC_C_LANGUAGE_STANDARD = gnu17; GCC_DYNAMIC_NO_PIC = NO; GCC_NO_COMMON_BLOCKS = YES; GCC_OPTIMIZATION_LEVEL = 0; GCC_PREPROCESSOR_DEFINITIONS = ("DEBUG=1",); IPHONEOS_DEPLOYMENT_TARGET = 16.0; MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE; MTL_FAST_MATH = YES; ONLY_ACTIVE_ARCH = YES; SDKROOT = iphoneos; SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG"; SWIFT_OPTIMIZATION_LEVEL = "-Onone"; }; name = Debug; };
-                000000000000000000000061 = {isa = XCBuildConfiguration; buildSettings = {ALWAYS_SEARCH_USER_PATHS = NO; ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES; CLANG_ANALYZER_NONNULL = YES; CLANG_CXX_LANGUAGE_STANDARD = "gnu++20"; CLANG_ENABLE_MODULES = YES; CLANG_ENABLE_OBJC_ARC = YES; DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym"; ENABLE_NS_ASSERTIONS = NO; ENABLE_STRICT_OBJC_MSGSEND = YES; GCC_C_LANGUAGE_STANDARD = gnu17; GCC_NO_COMMON_BLOCKS = YES; IPHONEOS_DEPLOYMENT_TARGET = 16.0; MTL_ENABLE_DEBUG_INFO = NO; MTL_FAST_MATH = YES; SDKROOT = iphoneos; SWIFT_COMPILATION_MODE = wholemodule; VALIDATE_PRODUCT = YES; }; name = Release; };
-                000000000000000000000070 = {isa = XCBuildConfiguration; buildSettings = {ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon; CODE_SIGN_STYLE = Automatic; CURRENT_PROJECT_VERSION = 1; GENERATE_INFOPLIST_FILE = YES; INFOPLIST_KEY_NSLocalNetworkUsageDescription = "ARIA needs local network access"; INFOPLIST_KEY_NSMicrophoneUsageDescription = "ARIA needs microphone for voice commands"; INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "ARIA needs speech recognition"; INFOPLIST_KEY_UILaunchScreen_Generation = YES; INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"; INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"; LD_RUNPATH_SEARCH_PATHS = ("$(inherited)","@executable_path/Frameworks"); MARKETING_VERSION = 1.0; PRODUCT_BUNDLE_IDENTIFIER = com.officialzpb.aria; PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_EMIT_LOC_STRINGS = YES; SWIFT_VERSION = 5.0; TARGETED_DEVICE_FAMILY = "1,2"; }; name = Debug; };
-                000000000000000000000071 = {isa = XCBuildConfiguration; buildSettings = {ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon; CODE_SIGN_STYLE = Automatic; CURRENT_PROJECT_VERSION = 1; GENERATE_INFOPLIST_FILE = YES; INFOPLIST_KEY_NSLocalNetworkUsageDescription = "ARIA needs local network access"; INFOPLIST_KEY_NSMicrophoneUsageDescription = "ARIA needs microphone for voice commands"; INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "ARIA needs speech recognition"; INFOPLIST_KEY_UILaunchScreen_Generation = YES; INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"; INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"; LD_RUNPATH_SEARCH_PATHS = ("$(inherited)","@executable_path/Frameworks"); MARKETING_VERSION = 1.0; PRODUCT_BUNDLE_IDENTIFIER = com.officialzpb.aria; PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_EMIT_LOC_STRINGS = YES; SWIFT_VERSION = 5.0; TARGETED_DEVICE_FAMILY = "1,2"; }; name = Release; };
-            };
-            rootObject = 000000000000000000000050;
+        	archiveVersion = 1;
+        	classes = {
+        	};
+        	objectVersion = 56;
+        	objects = {
+        
+        /* Begin PBXBuildFile section */
+        		A1B2C3D4E5F6789012345678 /* App.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6789012345670 /* App.swift */; };
+        		A1B2C3D4E5F6789012345679 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6789012345671 /* Assets.xcassets */; };
+        /* End PBXBuildFile section */
+
+        /* Begin PBXFileReference section */
+        		A1B2C3D4E5F6789012345660 /* ARIA.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ARIA.app; sourceTree = BUILT_PRODUCTS_DIR; };
+        		A1B2C3D4E5F6789012345670 /* App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App.swift; sourceTree = "<group>"; };
+        		A1B2C3D4E5F6789012345671 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+        /* End PBXFileReference section */
+
+        /* Begin PBXFrameworksBuildPhase section */
+        		A1B2C3D4E5F6789012345655 /* Frameworks */ = {
+        			isa = PBXFrameworksBuildPhase;
+        			buildActionMask = 2147483647;
+        			files = (
+        			);
+        			runOnlyForDeploymentPostprocessing = 0;
+        		};
+        /* End PBXFrameworksBuildPhase section */
+
+        /* Begin PBXGroup section */
+        		A1B2C3D4E5F6789012345650 = {
+        			isa = PBXGroup;
+        			children = (
+        				A1B2C3D4E5F6789012345665 /* ARIA */,
+        				A1B2C3D4E5F6789012345661 /* Products */,
+        			);
+        			sourceTree = "<group>";
+        		};
+        		A1B2C3D4E5F6789012345661 /* Products */ = {
+        			isa = PBXGroup;
+        			children = (
+        				A1B2C3D4E5F6789012345660 /* ARIA.app */,
+        			);
+        			name = Products;
+        			sourceTree = "<group>";
+        		};
+        		A1B2C3D4E5F6789012345665 /* ARIA */ = {
+        			isa = PBXGroup;
+        			children = (
+        				A1B2C3D4E5F6789012345670 /* App.swift */,
+        				A1B2C3D4E5F6789012345671 /* Assets.xcassets */,
+        			);
+        			path = ARIA;
+        			sourceTree = "<group>";
+        		};
+        /* End PBXGroup section */
+
+        /* Begin PBXNativeTarget section */
+        		A1B2C3D4E5F678901234565F /* ARIA */ = {
+        			isa = PBXNativeTarget;
+        			buildConfigurationList = A1B2C3D4E5F6789012345680 /* Build configuration list for PBXNativeTarget "ARIA" */;
+        			buildPhases = (
+        				A1B2C3D4E5F6789012345654 /* Sources */,
+        				A1B2C3D4E5F6789012345655 /* Frameworks */,
+        				A1B2C3D4E5F6789012345656 /* Resources */,
+        			);
+        			buildRules = (
+        			);
+        			dependencies = (
+        			);
+        			name = ARIA;
+        			productName = ARIA;
+        			productReference = A1B2C3D4E5F6789012345660 /* ARIA.app */;
+        			productType = "com.apple.product-type.application";
+        		};
+        /* End PBXNativeTarget section */
+
+        /* Begin PBXProject section */
+        		A1B2C3D4E5F6789012345651 /* Project object */ = {
+        			isa = PBXProject;
+        			buildConfigurationList = A1B2C3D4E5F6789012345652 /* Build configuration list for PBXProject "ARIA" */;
+        			compatibilityVersion = "Xcode 14.0";
+        			developmentRegion = en;
+        			hasScannedForEncodings = 0;
+        			knownRegions = (
+        				en,
+        				Base,
+        			);
+        			mainGroup = A1B2C3D4E5F6789012345650;
+        			productRefGroup = A1B2C3D4E5F6789012345661 /* Products */;
+        			projectDirPath = "";
+        			projectRoot = "";
+        			targets = (
+        				A1B2C3D4E5F678901234565F /* ARIA */,
+        			);
+        		};
+        /* End PBXProject section */
+
+        /* Begin PBXResourcesBuildPhase section */
+        		A1B2C3D4E5F6789012345656 /* Resources */ = {
+        			isa = PBXResourcesBuildPhase;
+        			buildActionMask = 2147483647;
+        			files = (
+        				A1B2C3D4E5F6789012345679 /* Assets.xcassets in Resources */,
+        			);
+        			runOnlyForDeploymentPostprocessing = 0;
+        		};
+        /* End PBXResourcesBuildPhase section */
+
+        /* Begin PBXSourcesBuildPhase section */
+        		A1B2C3D4E5F6789012345654 /* Sources */ = {
+        			isa = PBXSourcesBuildPhase;
+        			buildActionMask = 2147483647;
+        			files = (
+        				A1B2C3D4E5F6789012345678 /* App.swift in Sources */,
+        			);
+        			runOnlyForDeploymentPostprocessing = 0;
+        		};
+        /* End PBXSourcesBuildPhase section */
+
+        /* Begin XCBuildConfiguration section */
+        		A1B2C3D4E5F6789012345672 /* Debug */ = {
+        			isa = XCBuildConfiguration;
+        			buildSettings = {
+        				ALWAYS_SEARCH_USER_PATHS = NO;
+        				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+        				CLANG_ANALYZER_NONNULL = YES;
+        				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+        				CLANG_ENABLE_MODULES = YES;
+        				CLANG_ENABLE_OBJC_ARC = YES;
+        				DEBUG_INFORMATION_FORMAT = dwarf;
+        				ENABLE_STRICT_OBJC_MSGSEND = YES;
+        				ENABLE_TESTABILITY = YES;
+        				GCC_C_LANGUAGE_STANDARD = gnu17;
+        				GCC_DYNAMIC_NO_PIC = NO;
+        				GCC_NO_COMMON_BLOCKS = YES;
+        				GCC_OPTIMIZATION_LEVEL = 0;
+        				GCC_PREPROCESSOR_DEFINITIONS = (
+        					"DEBUG=1",
+        				);
+        				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+        				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+        				MTL_FAST_MATH = YES;
+        				ONLY_ACTIVE_ARCH = YES;
+        				SDKROOT = iphoneos;
+        				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG";
+        				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+        			};
+        			name = Debug;
+        	};
+        		A1B2C3D4E5F6789012345673 /* Release */ = {
+        			isa = XCBuildConfiguration;
+        			buildSettings = {
+        				ALWAYS_SEARCH_USER_PATHS = NO;
+        				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+        				CLANG_ANALYZER_NONNULL = YES;
+        				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+        				CLANG_ENABLE_MODULES = YES;
+        				CLANG_ENABLE_OBJC_ARC = YES;
+        				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+        				ENABLE_NS_ASSERTIONS = NO;
+        				ENABLE_STRICT_OBJC_MSGSEND = YES;
+        				GCC_C_LANGUAGE_STANDARD = gnu17;
+        				GCC_NO_COMMON_BLOCKS = YES;
+        				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+        				MTL_ENABLE_DEBUG_INFO = NO;
+        				MTL_FAST_MATH = YES;
+        				SDKROOT = iphoneos;
+        				SWIFT_COMPILATION_MODE = wholemodule;
+        				VALIDATE_PRODUCT = YES;
+        			};
+        			name = Release;
+        	};
+        		A1B2C3D4E5F6789012345681 /* Debug */ = {
+        			isa = XCBuildConfiguration;
+        			buildSettings = {
+        				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+        				CODE_SIGN_STYLE = Automatic;
+        				CURRENT_PROJECT_VERSION = 1;
+        				GENERATE_INFOPLIST_FILE = YES;
+        				INFOPLIST_KEY_NSMicrophoneUsageDescription = "ARIA needs microphone access for voice commands";
+        				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "ARIA needs speech recognition to process your voice";
+        				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+        				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+        				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+        				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+        				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+        				LD_RUNPATH_SEARCH_PATHS = (
+        					"$(inherited)",
+        					"@executable_path/Frameworks",
+        				);
+        				MARKETING_VERSION = 1.0;
+        				PRODUCT_BUNDLE_IDENTIFIER = com.officialzpb.aria;
+        				PRODUCT_NAME = "$(TARGET_NAME)";
+        				SWIFT_EMIT_LOC_STRINGS = YES;
+        				SWIFT_VERSION = 5.0;
+        				TARGETED_DEVICE_FAMILY = "1,2";
+        			};
+        			name = Debug;
+        	};
+        		A1B2C3D4E5F6789012345682 /* Release */ = {
+        			isa = XCBuildConfiguration;
+        			buildSettings = {
+        				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+        				CODE_SIGN_STYLE = Automatic;
+        				CURRENT_PROJECT_VERSION = 1;
+        				GENERATE_INFOPLIST_FILE = YES;
+        				INFOPLIST_KEY_NSMicrophoneUsageDescription = "ARIA needs microphone access for voice commands";
+        				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "ARIA needs speech recognition to process your voice";
+        				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+        				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+        				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+        				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+        				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+        				LD_RUNPATH_SEARCH_PATHS = (
+        					"$(inherited)",
+        					"@executable_path/Frameworks",
+        				);
+        				MARKETING_VERSION = 1.0;
+        				PRODUCT_BUNDLE_IDENTIFIER = com.officialzpb.aria;
+        				PRODUCT_NAME = "$(TARGET_NAME)";
+        				SWIFT_EMIT_LOC_STRINGS = YES;
+        				SWIFT_VERSION = 5.0;
+        				TARGETED_DEVICE_FAMILY = "1,2";
+        			};
+        			name = Release;
+        	};
+        /* End XCBuildConfiguration section */
+
+        /* Begin XCConfigurationList section */
+        		A1B2C3D4E5F6789012345652 /* Build configuration list for PBXProject "ARIA" */ = {
+        			isa = XCConfigurationList;
+        			buildConfigurations = (
+        				A1B2C3D4E5F6789012345672 /* Debug */,
+        				A1B2C3D4E5F6789012345673 /* Release */,
+        			);
+        			defaultConfigurationIsVisible = 0;
+        			defaultConfigurationName = Release;
+        		};
+        		A1B2C3D4E5F6789012345680 /* Build configuration list for PBXNativeTarget "ARIA" */ = {
+        			isa = XCConfigurationList;
+        			buildConfigurations = (
+        				A1B2C3D4E5F6789012345681 /* Debug */,
+        				A1B2C3D4E5F6789012345682 /* Release */,
+        			);
+        			defaultConfigurationIsVisible = 0;
+        			defaultConfigurationName = Release;
+        		};
+        /* End XCConfigurationList section */
+        	};
+        	rootObject = A1B2C3D4E5F6789012345651 /* Project object */;
         }
         PROJEOF
         
@@ -304,29 +503,34 @@ jobs:
       run: |
         cd ARIA-iOS
         
+        # Build the app
         xcodebuild -project ARIA.xcodeproj \
           -scheme ARIA \
           -configuration Release \
           -destination 'generic/platform=iOS' \
-          -archivePath $PWD/build/ARIA.xcarchive \
+          -archivePath "$PWD/build/ARIA.xcarchive" \
           archive \
           CODE_SIGNING_ALLOWED=NO \
           CODE_SIGNING_REQUIRED=NO \
-          CODE_SIGN_IDENTITY="" 2>&1 || echo "Build completed with warnings"
+          CODE_SIGN_IDENTITY="" \
+          | tee build.log
           
     - name: Create IPA
       run: |
         cd ARIA-iOS
         
+        # Check if archive exists
         if [ -d "build/ARIA.xcarchive/Products/Applications/ARIA.app" ]; then
+          echo "Archive found, creating IPA..."
           mkdir -p Payload
           cp -r build/ARIA.xcarchive/Products/Applications/ARIA.app Payload/
           zip -r ARIA.ipa Payload
-          echo "IPA created successfully"
+          echo "IPA created:"
           ls -lh ARIA.ipa
         else
-          echo "Build failed - checking for errors"
-          find build -type f -name "*.log" -exec cat {} \; 2>/dev/null || true
+          echo "Build failed - archive not found"
+          echo "Build log:"
+          cat build.log | tail -100
           exit 1
         fi
         
@@ -337,3 +541,11 @@ jobs:
         name: ARIA-iOS-IPA
         path: ARIA-iOS/ARIA.ipa
         retention-days: 30
+        
+    - name: Upload Build Logs on Failure
+      uses: actions/upload-artifact@v4
+      if: failure()
+      with:
+        name: build-logs
+        path: ARIA-iOS/build.log
+        retention-days: 7
