@@ -19,6 +19,17 @@ jobs:
     
     - name: Create iOS Project Files
       run: python3 .github/workflows/create-ios-project.py
+      
+    - name: Verify Project Structure
+      run: |
+        echo "=== Project Structure ==="
+        find ios -type f | head -20
+        echo ""
+        echo "=== Swift Files ==="
+        ls -la ios/ARIA/*.swift 2>/dev/null || echo "No Swift files found"
+        echo ""
+        echo "=== project.pbxproj exists? ==="
+        test -f ios/ARIA.xcodeproj/project.pbxproj && echo "YES" || echo "NO"
     
     - name: Build Archive
       run: |
@@ -29,7 +40,15 @@ jobs:
           -destination 'generic/platform=iOS' \
           -archivePath build/ARIA.xcarchive \
           archive \
-          CODE_SIGNING_ALLOWED=NO
+          CODE_SIGNING_ALLOWED=NO \
+          2>&1 | tee build.log
+        
+        if [ ${PIPESTATUS[0]} -ne 0 ]; then
+          echo "BUILD FAILED"
+          echo "=== ERROR OUTPUT ==="
+          grep -i "error:" build.log | head -20 || true
+          exit 1
+        fi
     
     - name: Create IPA
       run: |
