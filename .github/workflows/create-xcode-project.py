@@ -10,15 +10,20 @@ os.makedirs('ios/ARIA', exist_ok=True)
 os.makedirs('ios/ARIA.xcodeproj', exist_ok=True)
 os.makedirs('ios/ARIA/Assets.xcassets/AppIcon.appiconset', exist_ok=True)
 
-# Create main.swift
-main_swift = '''import SwiftUI
+# Create main.swift - must use AppDelegate pattern for this structure
+main_swift = '''import UIKit
+import SwiftUI
 
-@main
-struct ARIAApp: App {
-    var body: some Scene {
-        WindowGroup {
-            ContentView()
-        }
+@UIApplicationMain
+class AppDelegate: UIResponder, UIApplicationDelegate {
+    var window: UIWindow?
+
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        let window = UIWindow(frame: UIScreen.main.bounds)
+        window.rootViewController = UIHostingController(rootView: ContentView())
+        self.window = window
+        window.makeKeyAndVisible()
+        return true
     }
 }
 
