@@ -81,16 +81,10 @@ struct ARIAApp: App {
 
 struct ContentView: View {
     var body: some View {
-        VStack(spacing: 20) {
-            Image(systemName: "mic.circle.fill")
-                .font(.system(size: 80))
-                .foregroundColor(.blue)
+        VStack {
             Text("ARIA")
                 .font(.largeTitle)
-                .fontWeight(.bold)
-            Text("AI Routing & Integration Assistant")
-                .font(.subheadline)
-                .foregroundColor(.secondary)
+            Text("Hello World")
         }
     }
 }
