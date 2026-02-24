@@ -1,81 +1,77 @@
-name: Build ARIA iOS App
+name: Build ARIA iOS
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
-  build-ios:
+  build:
     runs-on: macos-latest
     
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-      
+    - uses: actions/checkout@v4
+    
     - name: Setup Xcode
       uses: maxim-lobanov/setup-xcode@v1
       with:
         xcode-version: latest-stable
-        
-    - name: Create Xcode Project
+    
+    - name: Create iOS Project
       run: |
-        cd ios
+        mkdir -p ios/ARIA/Assets.xcassets/AppIcon.appiconset
         
-        # Create Assets
-        mkdir -p ARIA/Assets.xcassets/AppIcon.appiconset
-        echo '{"images":[{"idiom":"universal","platform":"ios","size":"1024x1024"}],"info":{"author":"xcode","version":1}}' > ARIA/Assets.xcassets/AppIcon.appiconset/Contents.json
+        # Create AppIcon
+        echo '{"images":[{"idiom":"universal","platform":"ios","size":"1024x1024"}],"info":{"author":"xcode","version":1}}' > ios/ARIA/Assets.xcassets/AppIcon.appiconset/Contents.json
         
         # Create Info.plist
-        cat > ARIA/Info.plist << 'PLISTEOF'
-        <?xml version="1.0" encoding="UTF-8"?>
-        <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-        <plist version="1.0">
-        <dict>
-            <key>CFBundleDevelopmentRegion</key>
-            <string>en</string>
-            <key>CFBundleExecutable</key>
-            <string>ARIA</string>
-            <key>CFBundleIdentifier</key>
-            <string>com.officialzpb.aria</string>
-            <key>CFBundleInfoDictionaryVersion</key>
-            <string>6.0</string>
-            <key>CFBundleName</key>
-            <string>ARIA</string>
-            <key>CFBundlePackageType</key>
-            <string>APPL</string>
-            <key>CFBundleShortVersionString</key>
-            <string>1.0.0</string>
-            <key>CFBundleVersion</key>
-            <string>1</string>
-            <key>LSRequiresIPhoneOS</key>
-            <true/>
-            <key>UIApplicationSceneManifest</key>
-            <dict>
-                <key>UIApplicationSupportsMultipleScenes</key>
-                <true/>
-            </dict>
-            <key>UIApplicationSupportsIndirectInputEvents</key>
-            <true/>
-            <key>UILaunchScreen</key>
-            <dict/>
-            <key>UISupportedInterfaceOrientations</key>
-            <array>
-                <string>UIInterfaceOrientationPortrait</string>
-            </array>
-            <key>NSMicrophoneUsageDescription</key>
-            <string>ARIA needs microphone access for voice commands</string>
-            <key>NSSpeechRecognitionUsageDescription</key>
-            <string>ARIA needs speech recognition to process your voice</string>
-        </dict>
-        </plist>
-        PLISTEOF
+        cat > ios/ARIA/Info.plist << 'ENDOFFILE'
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleDevelopmentRegion</key>
+    <string>en</string>
+    <key>CFBundleExecutable</key>
+    <string>ARIA</string>
+    <key>CFBundleIdentifier</key>
+    <string>com.officialzpb.aria</string>
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+    <key>CFBundleName</key>
+    <string>ARIA</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleShortVersionString</key>
+    <string>1.0.0</string>
+    <key>CFBundleVersion</key>
+    <string>1</string>
+    <key>LSRequiresIPhoneOS</key>
+    <true/>
+    <key>UIApplicationSceneManifest</key>
+    <dict>
+        <key>UIApplicationSupportsMultipleScenes</key>
+        <true/>
+    </dict>
+    <key>UIApplicationSupportsIndirectInputEvents</key>
+    <true/>
+    <key>UILaunchScreen</key>
+    <dict/>
+    <key>UISupportedInterfaceOrientations</key>
+    <array>
+        <string>UIInterfaceOrientationPortrait</string>
+    </array>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>ARIA needs microphone access for voice commands</string>
+    <key>NSSpeechRecognitionUsageDescription</key>
+    <string>ARIA needs speech recognition to process your voice</string>
+</dict>
+</plist>
+ENDOFFILE
         
-        # Check for Swift files
-        SWIFT_FILES=$(ls ARIA/*.swift 2>/dev/null | xargs -n1 basename || echo "")
-        if [ -z "$SWIFT_FILES" ]; then
-          echo "No Swift files found, creating minimal App.swift"
-          cat > ARIA/App.swift << 'SWIFTEOF'
+        # Create minimal App.swift if no Swift files exist
+        if [ ! "$(ls -A ios/ARIA/*.swift 2>/dev/null)" ]; then
+          cat > ios/ARIA/App.swift << 'ENDOFFILE'
 import SwiftUI
 
 @main
@@ -89,359 +85,303 @@ struct ARIAApp: App {
 
 struct ContentView: View {
     var body: some View {
-        VStack {
+        VStack(spacing: 20) {
             Image(systemName: "mic.circle.fill")
                 .font(.system(size: 80))
                 .foregroundColor(.blue)
             Text("ARIA")
                 .font(.largeTitle)
                 .fontWeight(.bold)
-            Text("AI Routing and Integration Assistant")
+            Text("AI Routing & Integration Assistant")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
         }
     }
 }
-SWIFTEOF
+ENDOFFILE
         fi
-        
-        # Create project.pbxproj
-        mkdir -p ARIA.xcodeproj
-        
-        # Generate UUIDs
-        uuid1=$(python3 -c "import uuid; print(str(uuid.uuid4()).replace('-','').upper()[:24])")
-        uuid2=$(python3 -c "import uuid; print(str(uuid.uuid4()).replace('-','').upper()[:24])")
-        uuid3=$(python3 -c "import uuid; print(str(uuid.uuid4()).replace('-','').upper()[:24])")
-        uuid4=$(python3 -c "import uuid; print(str(uuid.uuid4()).replace('-','').upper()[:24])")
-        uuid5=$(python3 -c "import uuid; print(str(uuid.uuid4()).replace('-','').upper()[:24])")
-        uuid6=$(python3 -c "import uuid; print(str(uuid.uuid4()).replace('-','').upper()[:24])")
-        uuid7=$(python3 -c "import uuid; print(str(uuid.uuid4()).replace('-','').upper()[:24])")
-        uuid8=$(python3 -c "import uuid; print(str(uuid.uuid4()).replace('-','').upper()[:24])")
-        uuid9=$(python3 -c "import uuid; print(str(uuid.uuid4()).replace('-','').upper()[:24])")
-        uuid10=$(python3 -c "import uuid; print(str(uuid.uuid4()).replace('-','').upper()[:24])")
-        uuid11=$(python3 -c "import uuid; print(str(uuid.uuid4()).replace('-','').upper()[:24])")
-        uuid12=$(python3 -c "import uuid; print(str(uuid.uuid4()).replace('-','').upper()[:24])")
-        uuid13=$(python3 -c "import uuid; print(str(uuid.uuid4()).replace('-','').upper()[:24])")
-        uuid14=$(python3 -c "import uuid; print(str(uuid.uuid4()).replace('-','').upper()[:24])")
-        uuid15=$(python3 -c "import uuid; print(str(uuid.uuid4()).replace('-','').upper()[:24])")
-        uuid16=$(python3 -c "import uuid; print(str(uuid.uuid4()).replace('-','').upper()[:24])")
-        uuid17=$(python3 -c "import uuid; print(str(uuid.uuid4()).replace('-','').upper()[:24])")
-        uuid18=$(python3 -c "import uuid; print(str(uuid.uuid4()).replace('-','').upper()[:24])")
-        uuid19=$(python3 -c "import uuid; print(str(uuid.uuid4()).replace('-','').upper()[:24])")
-        uuid20=$(python3 -c "import uuid; print(str(uuid.uuid4()).replace('-','').upper()[:24])")
-        uuid21=$(python3 -c "import uuid; print(str(uuid.uuid4()).replace('-','').upper()[:24])")
-        uuid22=$(python3 -c "import uuid; print(str(uuid.uuid4()).replace('-','').upper()[:24])")
-        
-        # Get Swift file references
-        SWIFT_REFS=""
-        SWIFT_BUILD_FILES=""
-        CHILDREN=""
-        SOURCES=""
-        
-        for file in ARIA/*.swift; do
-          if [ -f "$file" ]; then
-            fname=$(basename "$file")
-            fref=$(python3 -c "import uuid; print(str(uuid.uuid4()).replace('-','').upper()[:24])")
-            bfile=$(python3 -c "import uuid; print(str(uuid.uuid4()).replace('-','').upper()[:24])")
-            SWIFT_REFS="${SWIFT_REFS}\t\t${fref} /* ${fname} */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ${fname}; sourceTree = \"<group>\"; };\n"
-            SWIFT_BUILD_FILES="${SWIFT_BUILD_FILES}\t\t\t\t${bfile} /* ${fname} in Sources */ = {isa = PBXBuildFile; fileRef = ${fref} /* ${fname} */; };\n"
-            CHILDREN="${CHILDREN}\t\t\t\t${fref} /* ${fname} */,\n"
-            SOURCES="${SOURCES}\t\t\t\t${bfile},\n"
-          fi
-        done
-        
-        # Create project.pbxproj
-        cat > ARIA.xcodeproj/project.pbxproj <> PBXEOF
-// !\$*UTF8*\$!
-{
-\tarchiveVersion = 1;
-\tclasses = {
-\t};
-\tobjectVersion = 56;
-\tobjects = {
-
-/* Begin PBXBuildFile section */
-${SWIFT_BUILD_FILES}\t\t${uuid1} /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = ${uuid2} /* Assets.xcassets */; };
-/* End PBXBuildFile section */
-
-/* Begin PBXFileReference section */
-\t\t${uuid3} /* ARIA.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ARIA.app; sourceTree = BUILT_PRODUCTS_DIR; };
-${SWIFT_REFS}\t\t${uuid2} /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-\t\t${uuid4} /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-/* End PBXFileReference section */
-
-/* Begin PBXFrameworksBuildPhase section */
-\t\t${uuid5} /* Frameworks */ = {
-\t\t\tisa = PBXFrameworksBuildPhase;
-\t\t\tbuildActionMask = 2147483647;
-\t\t\tfiles = (
-\t\t\t);
-\t\t\trunOnlyForDeploymentPostprocessing = 0;
-\t\t};
-/* End PBXFrameworksBuildPhase section */
-
-/* Begin PBXGroup section */
-\t\t${uuid6} = {
-\t\t\tisa = PBXGroup;
-\t\t\tchildren = (
-\t\t\t\t${uuid7} /* ARIA */,
-\t\t\t\t${uuid8} /* Products */,
-\t\t\t);
-\t\t\tsourceTree = "<group>";
-\t\t};
-\t\t${uuid8} /* Products */ = {
-\t\t\tisa = PBXGroup;
-\t\t\tchildren = (
-\t\t\t\t${uuid3} /* ARIA.app */,
-\t\t\t);
-\t\t\tname = Products;
-\t\t\tsourceTree = "<group>";
-\t\t};
-\t\t${uuid7} /* ARIA */ = {
-\t\t\tisa = PBXGroup;
-\t\t\tchildren = (
-${CHILDREN}\t\t\t\t${uuid2} /* Assets.xcassets */,
-\t\t\t\t${uuid4} /* Info.plist */,
-\t\t\t);
-\t\t\tpath = ARIA;
-\t\t\tsourceTree = "<group>";
-\t\t};
-/* End PBXGroup section */
-
-/* Begin PBXNativeTarget section */
-\t\t${uuid9} /* ARIA */ = {
-\t\t\tisa = PBXNativeTarget;
-\t\t\tbuildConfigurationList = ${uuid10} /* Build configuration list for PBXNativeTarget "ARIA" */;
-\t\t\tbuildPhases = (
-\t\t\t\t${uuid11} /* Sources */,
-\t\t\t\t${uuid5} /* Frameworks */,
-\t\t\t\t${uuid12} /* Resources */,
-\t\t\t);
-\t\t\tbuildRules = (
-\t\t\t);
-\t\t\tdependencies = (
-\t\t\t);
-\t\t\tname = ARIA;
-\t\t\tproductName = ARIA;
-\t\t\tproductReference = ${uuid3} /* ARIA.app */;
-\t\t\tproductType = "com.apple.product-type.application";
-\t\t};
-/* End PBXNativeTarget section */
-
-/* Begin PBXProject section */
-\t\t${uuid13} /* Project object */ = {
-\t\t\tisa = PBXProject;
-\t\t\tbuildConfigurationList = ${uuid14} /* Build configuration list for PBXProject "ARIA" */;
-\t\t\tcompatibilityVersion = "Xcode 14.0";
-\t\t\tdevelopmentRegion = en;
-\t\t\thasScannedForEncodings = 0;
-\t\t\tknownRegions = (
-\t\t\t\ten,
-\t\t\t\tBase,
-\t\t\t);
-\t\t\tmainGroup = ${uuid6};
-\t\t\tproductRefGroup = ${uuid8} /* Products */;
-\t\t\tprojectDirPath = "";
-\t\t\tprojectRoot = "";
-\t\t\ttargets = (
-\t\t\t\t${uuid9} /* ARIA */,
-\t\t\t);
-\t\t};
-/* End PBXProject section */
-
-/* Begin PBXResourcesBuildPhase section */
-\t\t${uuid12} /* Resources */ = {
-\t\t\tisa = PBXResourcesBuildPhase;
-\t\t\tbuildActionMask = 2147483647;
-\t\t\tfiles = (
-\t\t\t\t${uuid1} /* Assets.xcassets in Resources */,
-\t\t\t);
-\t\t\trunOnlyForDeploymentPostprocessing = 0;
-\t\t};
-/* End PBXResourcesBuildPhase section */
-
-/* Begin PBXSourcesBuildPhase section */
-\t\t${uuid11} /* Sources */ = {
-\t\t\tisa = PBXSourcesBuildPhase;
-\t\t\tbuildActionMask = 2147483647;
-\t\t\tfiles = (
-${SOURCES}\t\t\t);
-\t\t\trunOnlyForDeploymentPostprocessing = 0;
-\t\t};
-/* End PBXSourcesBuildPhase section */
-
-/* Begin XCBuildConfiguration section */
-\t\t${uuid15} /* Debug */ = {
-\t\t\tisa = XCBuildConfiguration;
-\t\t\tbuildSettings = {
-\t\t\t\tALWAYS_SEARCH_USER_PATHS = NO;
-\t\t\t\tASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
-\t\t\t\tCLANG_ANALYZER_NONNULL = YES;
-\t\t\t\tCLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
-\t\t\t\tCLANG_ENABLE_MODULES = YES;
-\t\t\t\tCLANG_ENABLE_OBJC_ARC = YES;
-\t\t\t\tDEBUG_INFORMATION_FORMAT = dwarf;
-\t\t\t\tENABLE_STRICT_OBJC_MSGSEND = YES;
-\t\t\t\tENABLE_TESTABILITY = YES;
-\t\t\t\tGCC_C_LANGUAGE_STANDARD = gnu17;
-\t\t\t\tGCC_DYNAMIC_NO_PIC = NO;
-\t\t\t\tGCC_NO_COMMON_BLOCKS = YES;
-\t\t\t\tGCC_OPTIMIZATION_LEVEL = 0;
-\t\t\t\tGCC_PREPROCESSOR_DEFINITIONS = (
-\t\t\t\t\t"DEBUG=1",
-\t\t\t\t);
-\t\t\t\tIPHONEOS_DEPLOYMENT_TARGET = 16.0;
-\t\t\t\tMTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
-\t\t\t\tMTL_FAST_MATH = YES;
-\t\t\t\tONLY_ACTIVE_ARCH = YES;
-\t\t\t\tSDKROOT = iphoneos;
-\t\t\t\tSWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG";
-\t\t\t\tSWIFT_OPTIMIZATION_LEVEL = "-Onone";
-\t\t\t};
-\t\t\tname = Debug;
-\t\t};
-\t\t${uuid16} /* Release */ = {
-\t\t\tisa = XCBuildConfiguration;
-\t\t\tbuildSettings = {
-\t\t\t\tALWAYS_SEARCH_USER_PATHS = NO;
-\t\t\t\tASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
-\t\t\t\tCLANG_ANALYZER_NONNULL = YES;
-\t\t\t\tCLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
-\t\t\t\tCLANG_ENABLE_MODULES = YES;
-\t\t\t\tCLANG_ENABLE_OBJC_ARC = YES;
-\t\t\t\tDEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-\t\t\t\tENABLE_NS_ASSERTIONS = NO;
-\t\t\t\tENABLE_STRICT_OBJC_MSGSEND = YES;
-\t\t\t\tGCC_C_LANGUAGE_STANDARD = gnu17;
-\t\t\t\tGCC_NO_COMMON_BLOCKS = YES;
-\t\t\t\tIPHONEOS_DEPLOYMENT_TARGET = 16.0;
-\t\t\t\tMTL_ENABLE_DEBUG_INFO = NO;
-\t\t\t\tMTL_FAST_MATH = YES;
-\t\t\t\tSDKROOT = iphoneos;
-\t\t\t\tSWIFT_COMPILATION_MODE = wholemodule;
-\t\t\t\tVALIDATE_PRODUCT = YES;
-\t\t\t};
-\t\t\tname = Release;
-\t\t};
-\t\t${uuid17} /* Debug */ = {
-\t\t\tisa = XCBuildConfiguration;
-\t\t\tbuildSettings = {
-\t\t\t\tASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-\t\t\t\tCODE_SIGN_STYLE = Automatic;
-\t\t\t\tCURRENT_PROJECT_VERSION = 1;
-\t\t\t\tGENERATE_INFOPLIST_FILE = YES;
-\t\t\t\tINFOPLIST_FILE = ARIA/Info.plist;
-\t\t\t\tINFOPLIST_KEY_NSMicrophoneUsageDescription = "ARIA needs microphone access for voice commands";
-\t\t\t\tINFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "ARIA needs speech recognition to process your voice";
-\t\t\t\tINFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-\t\t\t\tINFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-\t\t\t\tINFOPLIST_KEY_UILaunchScreen_Generation = YES;
-\t\t\t\tINFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-\t\t\t\tINFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-\t\t\t\tLD_RUNPATH_SEARCH_PATHS = (
-\t\t\t\t\t"$(inherited)",
-\t\t\t\t\t"@executable_path/Frameworks",
-\t\t\t\t);
-\t\t\t\tMARKETING_VERSION = 1.0;
-\t\t\t\tPRODUCT_BUNDLE_IDENTIFIER = com.officialzpb.aria;
-\t\t\t\tPRODUCT_NAME = "$(TARGET_NAME)";
-\t\t\t\tSWIFT_EMIT_LOC_STRINGS = YES;
-\t\t\t\tSWIFT_VERSION = 5.0;
-\t\t\t\tTARGETED_DEVICE_FAMILY = "1,2";
-\t\t\t};
-\t\t\tname = Debug;
-\t\t};
-\t\t${uuid18} /* Release */ = {
-\t\t\tisa = XCBuildConfiguration;
-\t\t\tbuildSettings = {
-\t\t\t\tASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-\t\t\t\tCODE_SIGN_STYLE = Automatic;
-\t\t\t\tCURRENT_PROJECT_VERSION = 1;
-\t\t\t\tGENERATE_INFOPLIST_FILE = YES;
-\t\t\t\tINFOPLIST_FILE = ARIA/Info.plist;
-\t\t\t\tINFOPLIST_KEY_NSMicrophoneUsageDescription = "ARIA needs microphone access for voice commands";
-\t\t\t\tINFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "ARIA needs speech recognition to process your voice";
-\t\t\t\tINFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-\t\t\t\tINFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-\t\t\t\tINFOPLIST_KEY_UILaunchScreen_Generation = YES;
-\t\t\t\tINFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-\t\t\t\tINFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-\t\t\t\tLD_RUNPATH_SEARCH_PATHS = (
-\t\t\t\t\t"$(inherited)",
-\t\t\t\t\t"@executable_path/Frameworks",
-\t\t\t\t);
-\t\t\t\tMARKETING_VERSION = 1.0;
-\t\t\t\tPRODUCT_BUNDLE_IDENTIFIER = com.officialzpb.aria;
-\t\t\t\tPRODUCT_NAME = "$(TARGET_NAME)";
-\t\t\t\tSWIFT_EMIT_LOC_STRINGS = YES;
-\t\t\t\tSWIFT_VERSION = 5.0;
-\t\t\t\tTARGETED_DEVICE_FAMILY = "1,2";
-\t\t\t};
-\t\t\tname = Release;
-\t\t};
-/* End XCBuildConfiguration section */
-
-/* Begin XCConfigurationList section */
-\t\t${uuid14} /* Build configuration list for PBXProject "ARIA" */ = {
-\t\t\tisa = XCConfigurationList;
-\t\t\tbuildConfigurations = (
-\t\t\t\t${uuid15} /* Debug */,
-\t\t\t\t${uuid16} /* Release */,
-\t\t\t);
-\t\t\tdefaultConfigurationIsVisible = 0;
-\t\t\tdefaultConfigurationName = Release;
-\t\t};
-\t\t${uuid10} /* Build configuration list for PBXNativeTarget "ARIA" */ = {
-\t\t\tisa = XCConfigurationList;
-\t\t\tbuildConfigurations = (
-\t\t\t\t${uuid17} /* Debug */,
-\t\t\t\t${uuid18} /* Release */,
-\t\t\t);
-\t\t\tdefaultConfigurationIsVisible = 0;
-\t\t\tdefaultConfigurationName = Release;
-\t\t};
-/* End XCConfigurationList section */
-\t};
-\trootObject = ${uuid13} /* Project object */;
-}
-PBXEOF
-        
-    - name: Build iOS App
+    
+    - name: Generate Xcode Project
       run: |
         cd ios
         
-        echo "Building ARIA..."
+        # Create project directory
+        mkdir -p ARIA.xcodeproj
+        
+        # Generate UUIDs
+        python3 << 'PYSCRIPT'
+import uuid
+import os
+
+def gen_uuid():
+    return str(uuid.uuid4()).replace('-', '').upper()[:24]
+
+# Generate all UUIDs
+uuids = {name: gen_uuid() for name in [
+    'root', 'main_group', 'products_group', 'aria_group', 'app_ref',
+    'assets_ref', 'plist_ref', 'target', 'sources_phase', 'resources_phase',
+    'frameworks_phase', 'project_config', 'target_config', 'debug_proj',
+    'release_proj', 'debug_target', 'release_target', 'assets_build'
+]}
+
+# Find Swift files
+swift_files = []
+if os.path.exists('ARIA'):
+    for f in os.listdir('ARIA'):
+        if f.endswith('.swift'):
+            file_uuid = gen_uuid()
+            build_uuid = gen_uuid()
+            swift_files.append((f, file_uuid, build_uuid))
+
+# Build file references section
+file_refs = []
+build_files = []
+children = []
+sources = []
+
+for fname, fref, bref in swift_files:
+    file_refs.append(f'\t\t{fref} /* {fname} */ = {{isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = {fname}; sourceTree = "<group>"; }};')
+    build_files.append(f'\t\t\t\t{bref} /* {fname} in Sources */ = {{isa = PBXBuildFile; fileRef = {fref} /* {fname} */; }};')
+    children.append(f'\t\t\t\t{fref} /* {fname} */,')
+    sources.append(f'\t\t\t\t{bref},')
+
+file_refs_str = '\n'.join(file_refs)
+build_files_str = '\n'.join(build_files)
+children_str = '\n'.join(children)
+sources_str = '\n'.join(sources)
+
+project = f'''// !$*UTF8*$!
+{{
+\tarchiveVersion = 1;
+\tclasses = {{}};
+\tobjectVersion = 56;
+\tobjects = {{
+
+/* Begin PBXBuildFile section */
+{build_files_str}
+\t\t{uuids['assets_build']} /* Assets.xcassets in Resources */ = {{isa = PBXBuildFile; fileRef = {uuids['assets_ref']} /* Assets.xcassets */; }};
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+\t\t{uuids['app_ref']} /* ARIA.app */ = {{isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ARIA.app; sourceTree = BUILT_PRODUCTS_DIR; }};
+{file_refs_str}
+\t\t{uuids['assets_ref']} /* Assets.xcassets */ = {{isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; }};
+\t\t{uuids['plist_ref']} /* Info.plist */ = {{isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; }};
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+\t\t{uuids['frameworks_phase']} /* Frameworks */ = {{
+\t\t\tisa = PBXFrameworksBuildPhase;
+\t\t\tbuildActionMask = 2147483647;
+\t\t\tfiles = ();
+\t\t\trunOnlyForDeploymentPostprocessing = 0;
+\t\t}};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+\t\t{uuids['main_group']} = {{
+\t\t\tisa = PBXGroup;
+\t\t\tchildren = (
+\t\t\t\t{uuids['aria_group']} /* ARIA */,
+\t\t\t\t{uuids['products_group']} /* Products */,
+\t\t\t);
+\t\t\tsourceTree = "<group>";
+\t\t}};
+\t\t{uuids['products_group']} /* Products */ = {{
+\t\t\tisa = PBXGroup;
+\t\t\tchildren = (
+\t\t\t\t{uuids['app_ref']} /* ARIA.app */,
+\t\t\t);
+\t\t\tname = Products;
+\t\t\tsourceTree = "<group>";
+\t\t}};
+\t\t{uuids['aria_group']} /* ARIA */ = {{
+\t\t\tisa = PBXGroup;
+\t\t\tchildren = (
+{children_str}
+\t\t\t\t{uuids['assets_ref']} /* Assets.xcassets */,
+\t\t\t\t{uuids['plist_ref']} /* Info.plist */,
+\t\t\t);
+\t\t\tpath = ARIA;
+\t\t\tsourceTree = "<group>";
+\t\t}};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+\t\t{uuids['target']} /* ARIA */ = {{
+\t\t\tisa = PBXNativeTarget;
+\t\t\tbuildConfigurationList = {uuids['target_config']} /* Build configuration list for PBXNativeTarget "ARIA" */;
+\t\t\tbuildPhases = (
+\t\t\t\t{uuids['sources_phase']} /* Sources */,
+\t\t\t\t{uuids['frameworks_phase']} /* Frameworks */,
+\t\t\t\t{uuids['resources_phase']} /* Resources */,
+\t\t\t);
+\t\t\tbuildRules = ();
+\t\t\tdependencies = ();
+\t\t\tname = ARIA;
+\t\t\tproductName = ARIA;
+\t\t\tproductReference = {uuids['app_ref']} /* ARIA.app */;
+\t\t\tproductType = "com.apple.product-type.application";
+\t\t}};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+\t\t{uuids['root']} /* Project object */ = {{
+\t\t\tisa = PBXProject;
+\t\t\tbuildConfigurationList = {uuids['project_config']} /* Build configuration list for PBXProject "ARIA" */;
+\t\t\tcompatibilityVersion = "Xcode 14.0";
+\t\t\tdevelopmentRegion = en;
+\t\t\thasScannedForEncodings = 0;
+\t\t\tknownRegions = (en, Base);
+\t\t\tmainGroup = {uuids['main_group']};
+\t\t\tproductRefGroup = {uuids['products_group']} /* Products */;
+\t\t\tprojectDirPath = "";
+\t\t\tprojectRoot = "";
+\t\t\ttargets = ({uuids['target']} /* ARIA */);
+\t\t}};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+\t\t{uuids['resources_phase']} /* Resources */ = {{
+\t\t\tisa = PBXResourcesBuildPhase;
+\t\t\tbuildActionMask = 2147483647;
+\t\t\tfiles = (
+\t\t\t\t{uuids['assets_build']} /* Assets.xcassets in Resources */,
+\t\t\t);
+\t\t\trunOnlyForDeploymentPostprocessing = 0;
+\t\t}};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+\t\t{uuids['sources_phase']} /* Sources */ = {{
+\t\t\tisa = PBXSourcesBuildPhase;
+\t\t\tbuildActionMask = 2147483647;
+\t\t\tfiles = (
+{sources_str}
+\t\t\t);
+\t\t\trunOnlyForDeploymentPostprocessing = 0;
+\t\t}};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+\t\t{uuids['debug_proj']} /* Debug */ = {{
+\t\t\tisa = XCBuildConfiguration;
+\t\t\tbuildSettings = {{
+\t\t\t\tALWAYS_SEARCH_USER_PATHS = NO;
+\t\t\t\tCLANG_ENABLE_MODULES = YES;
+\t\t\t\tCLANG_ENABLE_OBJC_ARC = YES;
+\t\t\t\tDEBUG_INFORMATION_FORMAT = dwarf;
+\t\t\t\tENABLE_TESTABILITY = YES;
+\t\t\t\tGCC_OPTIMIZATION_LEVEL = 0;
+\t\t\t\tIPHONEOS_DEPLOYMENT_TARGET = 16.0;
+\t\t\t\tONLY_ACTIVE_ARCH = YES;
+\t\t\t\tSDKROOT = iphoneos;
+\t\t\t\tSWIFT_OPTIMIZATION_LEVEL = "-Onone";
+\t\t\t}};
+\t\t\tname = Debug;
+\t\t}};
+\t\t{uuids['release_proj']} /* Release */ = {{
+\t\t\tisa = XCBuildConfiguration;
+\t\t\tbuildSettings = {{
+\t\t\t\tALWAYS_SEARCH_USER_PATHS = NO;
+\t\t\t\tCLANG_ENABLE_MODULES = YES;
+\t\t\t\tCLANG_ENABLE_OBJC_ARC = YES;
+\t\t\t\tDEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+\t\t\t\tIPHONEOS_DEPLOYMENT_TARGET = 16.0;
+\t\t\t\tSDKROOT = iphoneos;
+\t\t\t\tSWIFT_COMPILATION_MODE = wholemodule;
+\t\t\t\tVALIDATE_PRODUCT = YES;
+\t\t\t}};
+\t\t\tname = Release;
+\t\t}};
+\t\t{uuids['debug_target']} /* Debug */ = {{
+\t\t\tisa = XCBuildConfiguration;
+\t\t\tbuildSettings = {{
+\t\t\t\tASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+\t\t\t\tCODE_SIGN_STYLE = Automatic;
+\t\t\t\tCURRENT_PROJECT_VERSION = 1;
+\t\t\t\tGENERATE_INFOPLIST_FILE = YES;
+\t\t\t\tINFOPLIST_FILE = ARIA/Info.plist;
+\t\t\t\tINFOPLIST_KEY_NSMicrophoneUsageDescription = "ARIA needs microphone access";
+\t\t\t\tINFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "ARIA needs speech recognition";
+\t\t\t\tINFOPLIST_KEY_UILaunchScreen_Generation = YES;
+\t\t\t\tLD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks");
+\t\t\t\tMARKETING_VERSION = 1.0;
+\t\t\t\tPRODUCT_BUNDLE_IDENTIFIER = com.officialzpb.aria;
+\t\t\t\tPRODUCT_NAME = "$(TARGET_NAME)";
+\t\t\t\tSWIFT_VERSION = 5.0;
+\t\t\t\tTARGETED_DEVICE_FAMILY = "1,2";
+\t\t\t}};
+\t\t\tname = Debug;
+\t\t}};
+\t\t{uuids['release_target']} /* Release */ = {{
+\t\t\tisa = XCBuildConfiguration;
+\t\t\tbuildSettings = {{
+\t\t\t\tASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+\t\t\t\tCODE_SIGN_STYLE = Automatic;
+\t\t\t\tCURRENT_PROJECT_VERSION = 1;
+\t\t\t\tGENERATE_INFOPLIST_FILE = YES;
+\t\t\t\tINFOPLIST_FILE = ARIA/Info.plist;
+\t\t\t\tINFOPLIST_KEY_NSMicrophoneUsageDescription = "ARIA needs microphone access";
+\t\t\t\tINFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "ARIA needs speech recognition";
+\t\t\t\tINFOPLIST_KEY_UILaunchScreen_Generation = YES;
+\t\t\t\tLD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks");
+\t\t\t\tMARKETING_VERSION = 1.0;
+\t\t\t\tPRODUCT_BUNDLE_IDENTIFIER = com.officialzpb.aria;
+\t\t\t\tPRODUCT_NAME = "$(TARGET_NAME)";
+\t\t\t\tSWIFT_VERSION = 5.0;
+\t\t\t\tTARGETED_DEVICE_FAMILY = "1,2";
+\t\t\t}};
+\t\t\tname = Release;
+\t\t}};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+\t\t{uuids['project_config']} /* Build configuration list for PBXProject "ARIA" */ = {{
+\t\t\tisa = XCConfigurationList;
+\t\t\tbuildConfigurations = ({uuids['debug_proj']} /* Debug */, {uuids['release_proj']} /* Release */);
+\t\t\tdefaultConfigurationIsVisible = 0;
+\t\t\tdefaultConfigurationName = Release;
+\t\t}};
+\t\t{uuids['target_config']} /* Build configuration list for PBXNativeTarget "ARIA" */ = {{
+\t\t\tisa = XCConfigurationList;
+\t\t\tbuildConfigurations = ({uuids['debug_target']} /* Debug */, {uuids['release_target']} /* Release */);
+\t\t\tdefaultConfigurationIsVisible = 0;
+\t\t\tdefaultConfigurationName = Release;
+\t\t}};
+/* End XCConfigurationList section */
+\t}};
+\trootObject = {uuids['root']} /* Project object */;
+}}
+'''
+
+        with open('ARIA.xcodeproj/project.pbxproj', 'w') as f:
+            f.write(project)
+
+        print('Created ARIA.xcodeproj/project.pbxproj')
+PYSCRIPT
+    
+    - name: Build Archive
+      run: |
+        cd ios
         xcodebuild -project ARIA.xcodeproj \
           -scheme ARIA \
           -configuration Release \
           -destination 'generic/platform=iOS' \
-          -archivePath "$PWD/build/ARIA.xcarchive" \
+          -archivePath build/ARIA.xcarchive \
           archive \
-          CODE_SIGNING_ALLOWED=NO \
-          CODE_SIGNING_REQUIRED=NO \
-          CODE_SIGN_IDENTITY=""
-          
+          CODE_SIGNING_ALLOWED=NO
+    
     - name: Create IPA
       run: |
         cd ios
-        
-        if [ -d "build/ARIA.xcarchive/Products/Applications/ARIA.app" ]; then
-          echo "Creating IPA..."
-          mkdir -p Payload
-          cp -r build/ARIA.xcarchive/Products/Applications/ARIA.app Payload/
-          zip -r ../ARIA.ipa Payload
-          cd ..
-          ls -lh ARIA.ipa
-        else
-          echo "Build failed - checking contents:"
-          find build -type f 2>/dev/null | head -20
-          exit 1
-        fi
-        
+        mkdir -p Payload
+        cp -r build/ARIA.xcarchive/Products/Applications/ARIA.app Payload/
+        zip -r ../ARIA.ipa Payload
+        ls -lh ../ARIA.ipa
+    
     - name: Upload IPA
       uses: actions/upload-artifact@v4
-      if: success()
       with:
-        name: ARIA-iOS-IPA
+        name: ARIA-iOS
         path: ARIA.ipa
-        retention-days: 30
