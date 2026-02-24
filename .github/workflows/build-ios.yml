@@ -18,32 +18,16 @@ jobs:
       with:
         xcode-version: latest-stable
         
-    - name: Check for existing iOS project
+    - name: Create Xcode Project
       run: |
-        echo "Checking iOS project structure..."
-        ls -la ios/ 2>/dev/null || echo "No ios folder"
-        find . -name "*.xcodeproj" -type d 2>/dev/null || echo "No xcodeproj found"
-        
-    - name: Create Xcode Project from existing Swift files
-      run: |
-        # Use the existing iOS Swift files
         cd ios
         
-        # Check if ARIA folder exists with Swift files
-        if [ -d "ARIA" ]; then
-          echo "Found ARIA folder"
-          ls -la ARIA/
-        else
-          echo "Creating ARIA folder structure"
-          mkdir -p ARIA
-        fi
-        
-        # Create a minimal Assets.xcassets if not exists
+        # Create Assets
         mkdir -p ARIA/Assets.xcassets/AppIcon.appiconset
         echo '{"images":[{"idiom":"universal","platform":"ios","size":"1024x1024"}],"info":{"author":"xcode","version":1}}' > ARIA/Assets.xcassets/AppIcon.appiconset/Contents.json
         
         # Create Info.plist
-        cat > ARIA/Info.plist << 'EOF'
+        cat > ARIA/Info.plist << 'PLISTEOF'
         <?xml version="1.0" encoding="UTF-8"?>
         <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
         <plist version="1.0">
@@ -85,49 +69,14 @@ jobs:
             <string>ARIA needs speech recognition to process your voice</string>
         </dict>
         </plist>
-        EOF
+        PLISTEOF
         
-        # Create project.pbxproj using Python for proper formatting
-        python3 << 'PYEOF'
-        import uuid
-        import os
-
-        def generate_uuid():
-            return str(uuid.uuid4()).replace('-', '').upper()[:24]
-
-        # Generate unique IDs
-        root_object = generate_uuid()
-        main_group = generate_uuid()
-        products_group = generate_uuid()
-        aria_group = generate_uuid()
-        app_ref = generate_uuid()
-        app_swift_ref = generate_uuid()
-        assets_ref = generate_uuid()
-        plist_ref = generate_uuid()
-        target = generate_uuid()
-        sources_build_phase = generate_uuid()
-        resources_build_phase = generate_uuid()
-        frameworks_build_phase = generate_uuid()
-        build_config_list_project = generate_uuid()
-        build_config_list_target = generate_uuid()
-        debug_config_project = generate_uuid()
-        release_config_project = generate_uuid()
-        debug_config_target = generate_uuid()
-        release_config_target = generate_uuid()
-        source_build_file = generate_uuid()
-        resources_build_file = generate_uuid()
-
-        # Check which Swift files exist
-        swift_files = []
-        if os.path.exists('ARIA/ARIAApp.swift'):
-            swift_files.append(('ARIAApp.swift', generate_uuid(), generate_uuid()))
-        if os.path.exists('ARIA/App.swift'):
-            swift_files.append(('App.swift', generate_uuid(), generate_uuid()))
-        
-        # If no Swift files found, create a minimal one
-        if not swift_files:
-            with open('ARIA/App.swift', 'w') as f:
-                f.write('''import SwiftUI
+        # Check for Swift files
+        SWIFT_FILES=$(ls ARIA/*.swift 2>/dev/null | xargs -n1 basename || echo "")
+        if [ -z "$SWIFT_FILES" ]; then
+          echo "No Swift files found, creating minimal App.swift"
+          cat > ARIA/App.swift << 'SWIFTEOF'
+import SwiftUI
 
 @main
 struct ARIAApp: App {
@@ -147,99 +96,126 @@ struct ContentView: View {
             Text("ARIA")
                 .font(.largeTitle)
                 .fontWeight(.bold)
-            Text("AI Routing & Integration Assistant")
+            Text("AI Routing and Integration Assistant")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
         }
     }
 }
-''')
-            swift_files.append(('App.swift', generate_uuid(), generate_uuid()))
-
-        # Build file references
-        file_refs = []
-        build_files = []
-        for filename, file_ref, build_file in swift_files:
-            file_refs.append(f'\t\t{file_ref} /* {filename} */ = {{isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = {filename}; sourceTree = "<group>"; }};')
-            build_files.append(f'\t\t\t\t{build_file} /* {filename} in Sources */ = {{isa = PBXBuildFile; fileRef = {file_ref} /* {filename} */; }};')
-
-        file_refs_str = '\n'.join(file_refs)
-        build_files_str = '\n'.join(build_files)
-
-        # Build children list
-        children = [f'{file_ref} /* {filename} */' for filename, file_ref, _ in swift_files]
-        children.append(f'{assets_ref} /* Assets.xcassets */')
-        children.append(f'{plist_ref} /* Info.plist */')
-        children_str = '\n'.join(f'\t\t\t\t{child},' for child in children)
-
-        # Build sources phase
-        sources_phase = '\n'.join(f'\t\t\t\t{build_file},' for _, _, build_file in swift_files)
-
-        project_content = f'''// !$*UTF8*$!
-{{
+SWIFTEOF
+        fi
+        
+        # Create project.pbxproj
+        mkdir -p ARIA.xcodeproj
+        
+        # Generate UUIDs
+        uuid1=$(python3 -c "import uuid; print(str(uuid.uuid4()).replace('-','').upper()[:24])")
+        uuid2=$(python3 -c "import uuid; print(str(uuid.uuid4()).replace('-','').upper()[:24])")
+        uuid3=$(python3 -c "import uuid; print(str(uuid.uuid4()).replace('-','').upper()[:24])")
+        uuid4=$(python3 -c "import uuid; print(str(uuid.uuid4()).replace('-','').upper()[:24])")
+        uuid5=$(python3 -c "import uuid; print(str(uuid.uuid4()).replace('-','').upper()[:24])")
+        uuid6=$(python3 -c "import uuid; print(str(uuid.uuid4()).replace('-','').upper()[:24])")
+        uuid7=$(python3 -c "import uuid; print(str(uuid.uuid4()).replace('-','').upper()[:24])")
+        uuid8=$(python3 -c "import uuid; print(str(uuid.uuid4()).replace('-','').upper()[:24])")
+        uuid9=$(python3 -c "import uuid; print(str(uuid.uuid4()).replace('-','').upper()[:24])")
+        uuid10=$(python3 -c "import uuid; print(str(uuid.uuid4()).replace('-','').upper()[:24])")
+        uuid11=$(python3 -c "import uuid; print(str(uuid.uuid4()).replace('-','').upper()[:24])")
+        uuid12=$(python3 -c "import uuid; print(str(uuid.uuid4()).replace('-','').upper()[:24])")
+        uuid13=$(python3 -c "import uuid; print(str(uuid.uuid4()).replace('-','').upper()[:24])")
+        uuid14=$(python3 -c "import uuid; print(str(uuid.uuid4()).replace('-','').upper()[:24])")
+        uuid15=$(python3 -c "import uuid; print(str(uuid.uuid4()).replace('-','').upper()[:24])")
+        uuid16=$(python3 -c "import uuid; print(str(uuid.uuid4()).replace('-','').upper()[:24])")
+        uuid17=$(python3 -c "import uuid; print(str(uuid.uuid4()).replace('-','').upper()[:24])")
+        uuid18=$(python3 -c "import uuid; print(str(uuid.uuid4()).replace('-','').upper()[:24])")
+        uuid19=$(python3 -c "import uuid; print(str(uuid.uuid4()).replace('-','').upper()[:24])")
+        uuid20=$(python3 -c "import uuid; print(str(uuid.uuid4()).replace('-','').upper()[:24])")
+        uuid21=$(python3 -c "import uuid; print(str(uuid.uuid4()).replace('-','').upper()[:24])")
+        uuid22=$(python3 -c "import uuid; print(str(uuid.uuid4()).replace('-','').upper()[:24])")
+        
+        # Get Swift file references
+        SWIFT_REFS=""
+        SWIFT_BUILD_FILES=""
+        CHILDREN=""
+        SOURCES=""
+        
+        for file in ARIA/*.swift; do
+          if [ -f "$file" ]; then
+            fname=$(basename "$file")
+            fref=$(python3 -c "import uuid; print(str(uuid.uuid4()).replace('-','').upper()[:24])")
+            bfile=$(python3 -c "import uuid; print(str(uuid.uuid4()).replace('-','').upper()[:24])")
+            SWIFT_REFS="${SWIFT_REFS}\t\t${fref} /* ${fname} */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ${fname}; sourceTree = \"<group>\"; };\n"
+            SWIFT_BUILD_FILES="${SWIFT_BUILD_FILES}\t\t\t\t${bfile} /* ${fname} in Sources */ = {isa = PBXBuildFile; fileRef = ${fref} /* ${fname} */; };\n"
+            CHILDREN="${CHILDREN}\t\t\t\t${fref} /* ${fname} */,\n"
+            SOURCES="${SOURCES}\t\t\t\t${bfile},\n"
+          fi
+        done
+        
+        # Create project.pbxproj
+        cat > ARIA.xcodeproj/project.pbxproj <> PBXEOF
+// !\$*UTF8*\$!
+{
 \tarchiveVersion = 1;
-\tclasses = {{
-\t}};
+\tclasses = {
+\t};
 \tobjectVersion = 56;
-\tobjects = {{
+\tobjects = {
 
 /* Begin PBXBuildFile section */
-{build_files_str}
-\t\t{resources_build_file} /* Assets.xcassets in Resources */ = {{isa = PBXBuildFile; fileRef = {assets_ref} /* Assets.xcassets */; }};
+${SWIFT_BUILD_FILES}\t\t${uuid1} /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = ${uuid2} /* Assets.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-\t\t{app_ref} /* ARIA.app */ = {{isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ARIA.app; sourceTree = BUILT_PRODUCTS_DIR; }};
-{file_refs_str}
-\t\t{assets_ref} /* Assets.xcassets */ = {{isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; }};
-\t\t{plist_ref} /* Info.plist */ = {{isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; }};
+\t\t${uuid3} /* ARIA.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ARIA.app; sourceTree = BUILT_PRODUCTS_DIR; };
+${SWIFT_REFS}\t\t${uuid2} /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+\t\t${uuid4} /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-\t\t{frameworks_build_phase} /* Frameworks */ = {{
+\t\t${uuid5} /* Frameworks */ = {
 \t\t\tisa = PBXFrameworksBuildPhase;
 \t\t\tbuildActionMask = 2147483647;
 \t\t\tfiles = (
 \t\t\t);
 \t\t\trunOnlyForDeploymentPostprocessing = 0;
-\t\t}};
+\t\t};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-\t\t{main_group} = {{
+\t\t${uuid6} = {
 \t\t\tisa = PBXGroup;
 \t\t\tchildren = (
-\t\t\t\t{aria_group} /* ARIA */,
-\t\t\t\t{products_group} /* Products */,
+\t\t\t\t${uuid7} /* ARIA */,
+\t\t\t\t${uuid8} /* Products */,
 \t\t\t);
 \t\t\tsourceTree = "<group>";
-\t\t}};
-\t\t{products_group} /* Products */ = {{
+\t\t};
+\t\t${uuid8} /* Products */ = {
 \t\t\tisa = PBXGroup;
 \t\t\tchildren = (
-\t\t\t\t{app_ref} /* ARIA.app */,
+\t\t\t\t${uuid3} /* ARIA.app */,
 \t\t\t);
 \t\t\tname = Products;
 \t\t\tsourceTree = "<group>";
-\t\t}};
-\t\t{aria_group} /* ARIA */ = {{
+\t\t};
+\t\t${uuid7} /* ARIA */ = {
 \t\t\tisa = PBXGroup;
 \t\t\tchildren = (
-{children_str}
+${CHILDREN}\t\t\t\t${uuid2} /* Assets.xcassets */,
+\t\t\t\t${uuid4} /* Info.plist */,
 \t\t\t);
 \t\t\tpath = ARIA;
 \t\t\tsourceTree = "<group>";
-\t\t}};
+\t\t};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-\t\t{target} /* ARIA */ = {{
+\t\t${uuid9} /* ARIA */ = {
 \t\t\tisa = PBXNativeTarget;
-\t\t\tbuildConfigurationList = {build_config_list_target} /* Build configuration list for PBXNativeTarget "ARIA" */;
+\t\t\tbuildConfigurationList = ${uuid10} /* Build configuration list for PBXNativeTarget "ARIA" */;
 \t\t\tbuildPhases = (
-\t\t\t\t{sources_build_phase} /* Sources */,
-\t\t\t\t{frameworks_build_phase} /* Frameworks */,
-\t\t\t\t{resources_build_phase} /* Resources */,
+\t\t\t\t${uuid11} /* Sources */,
+\t\t\t\t${uuid5} /* Frameworks */,
+\t\t\t\t${uuid12} /* Resources */,
 \t\t\t);
 \t\t\tbuildRules = (
 \t\t\t);
@@ -247,15 +223,15 @@ struct ContentView: View {
 \t\t\t);
 \t\t\tname = ARIA;
 \t\t\tproductName = ARIA;
-\t\t\tproductReference = {app_ref} /* ARIA.app */;
+\t\t\tproductReference = ${uuid3} /* ARIA.app */;
 \t\t\tproductType = "com.apple.product-type.application";
-\t\t}};
+\t\t};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-\t\t{root_object} /* Project object */ = {{
+\t\t${uuid13} /* Project object */ = {
 \t\t\tisa = PBXProject;
-\t\t\tbuildConfigurationList = {build_config_list_project} /* Build configuration list for PBXProject "ARIA" */;
+\t\t\tbuildConfigurationList = ${uuid14} /* Build configuration list for PBXProject "ARIA" */;
 \t\t\tcompatibilityVersion = "Xcode 14.0";
 \t\t\tdevelopmentRegion = en;
 \t\t\thasScannedForEncodings = 0;
@@ -263,42 +239,41 @@ struct ContentView: View {
 \t\t\t\ten,
 \t\t\t\tBase,
 \t\t\t);
-\t\t\tmainGroup = {main_group};
-\t\t\tproductRefGroup = {products_group} /* Products */;
+\t\t\tmainGroup = ${uuid6};
+\t\t\tproductRefGroup = ${uuid8} /* Products */;
 \t\t\tprojectDirPath = "";
 \t\t\tprojectRoot = "";
 \t\t\ttargets = (
-\t\t\t\t{target} /* ARIA */,
+\t\t\t\t${uuid9} /* ARIA */,
 \t\t\t);
-\t\t}};
+\t\t};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-\t\t{resources_build_phase} /* Resources */ = {{
+\t\t${uuid12} /* Resources */ = {
 \t\t\tisa = PBXResourcesBuildPhase;
 \t\t\tbuildActionMask = 2147483647;
 \t\t\tfiles = (
-\t\t\t\t{resources_build_file} /* Assets.xcassets in Resources */,
+\t\t\t\t${uuid1} /* Assets.xcassets in Resources */,
 \t\t\t);
 \t\t\trunOnlyForDeploymentPostprocessing = 0;
-\t\t}};
+\t\t};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-\t\t{sources_build_phase} /* Sources */ = {{
+\t\t${uuid11} /* Sources */ = {
 \t\t\tisa = PBXSourcesBuildPhase;
 \t\t\tbuildActionMask = 2147483647;
 \t\t\tfiles = (
-{sources_phase}
-\t\t\t);
+${SOURCES}\t\t\t);
 \t\t\trunOnlyForDeploymentPostprocessing = 0;
-\t\t}};
+\t\t};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-\t\t{debug_config_project} /* Debug */ = {{
+\t\t${uuid15} /* Debug */ = {
 \t\t\tisa = XCBuildConfiguration;
-\t\t\tbuildSettings = {{
+\t\t\tbuildSettings = {
 \t\t\t\tALWAYS_SEARCH_USER_PATHS = NO;
 \t\t\t\tASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 \t\t\t\tCLANG_ANALYZER_NONNULL = YES;
@@ -322,12 +297,12 @@ struct ContentView: View {
 \t\t\t\tSDKROOT = iphoneos;
 \t\t\t\tSWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG";
 \t\t\t\tSWIFT_OPTIMIZATION_LEVEL = "-Onone";
-\t\t\t}};
+\t\t\t};
 \t\t\tname = Debug;
-\t\t}};
-\t\t{release_config_project} /* Release */ = {{
+\t\t};
+\t\t${uuid16} /* Release */ = {
 \t\t\tisa = XCBuildConfiguration;
-\t\t\tbuildSettings = {{
+\t\t\tbuildSettings = {
 \t\t\t\tALWAYS_SEARCH_USER_PATHS = NO;
 \t\t\t\tASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 \t\t\t\tCLANG_ANALYZER_NONNULL = YES;
@@ -345,12 +320,12 @@ struct ContentView: View {
 \t\t\t\tSDKROOT = iphoneos;
 \t\t\t\tSWIFT_COMPILATION_MODE = wholemodule;
 \t\t\t\tVALIDATE_PRODUCT = YES;
-\t\t\t}};
+\t\t\t};
 \t\t\tname = Release;
-\t\t}};
-\t\t{debug_config_target} /* Debug */ = {{
+\t\t};
+\t\t${uuid17} /* Debug */ = {
 \t\t\tisa = XCBuildConfiguration;
-\t\t\tbuildSettings = {{
+\t\t\tbuildSettings = {
 \t\t\t\tASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 \t\t\t\tCODE_SIGN_STYLE = Automatic;
 \t\t\t\tCURRENT_PROJECT_VERSION = 1;
@@ -373,12 +348,12 @@ struct ContentView: View {
 \t\t\t\tSWIFT_EMIT_LOC_STRINGS = YES;
 \t\t\t\tSWIFT_VERSION = 5.0;
 \t\t\t\tTARGETED_DEVICE_FAMILY = "1,2";
-\t\t\t}};
+\t\t\t};
 \t\t\tname = Debug;
-\t\t}};
-\t\t{release_config_target} /* Release */ = {{
+\t\t};
+\t\t${uuid18} /* Release */ = {
 \t\t\tisa = XCBuildConfiguration;
-\t\t\tbuildSettings = {{
+\t\t\tbuildSettings = {
 \t\t\t\tASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 \t\t\t\tCODE_SIGN_STYLE = Automatic;
 \t\t\t\tCURRENT_PROJECT_VERSION = 1;
@@ -401,53 +376,41 @@ struct ContentView: View {
 \t\t\t\tSWIFT_EMIT_LOC_STRINGS = YES;
 \t\t\t\tSWIFT_VERSION = 5.0;
 \t\t\t\tTARGETED_DEVICE_FAMILY = "1,2";
-\t\t\t}};
+\t\t\t};
 \t\t\tname = Release;
-\t\t}};
+\t\t};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-\t\t{build_config_list_project} /* Build configuration list for PBXProject "ARIA" */ = {{
+\t\t${uuid14} /* Build configuration list for PBXProject "ARIA" */ = {
 \t\t\tisa = XCConfigurationList;
 \t\t\tbuildConfigurations = (
-\t\t\t\t{debug_config_project} /* Debug */,
-\t\t\t\t{release_config_project} /* Release */,
+\t\t\t\t${uuid15} /* Debug */,
+\t\t\t\t${uuid16} /* Release */,
 \t\t\t);
 \t\t\tdefaultConfigurationIsVisible = 0;
 \t\t\tdefaultConfigurationName = Release;
-\t\t}};
-\t\t{build_config_list_target} /* Build configuration list for PBXNativeTarget "ARIA" */ = {{
+\t\t};
+\t\t${uuid10} /* Build configuration list for PBXNativeTarget "ARIA" */ = {
 \t\t\tisa = XCConfigurationList;
 \t\t\tbuildConfigurations = (
-\t\t\t\t{debug_config_target} /* Debug */,
-\t\t\t\t{release_config_target} /* Release */,
+\t\t\t\t${uuid17} /* Debug */,
+\t\t\t\t${uuid18} /* Release */,
 \t\t\t);
 \t\t\tdefaultConfigurationIsVisible = 0;
 \t\t\tdefaultConfigurationName = Release;
-\t\t}};
+\t\t};
 /* End XCConfigurationList section */
-\t}};
-\trootObject = {root_object} /* Project object */;
-}}
-'''
-
-        os.makedirs('ARIA.xcodeproj', exist_ok=True)
-        with open('ARIA.xcodeproj/project.pbxproj', 'w') as f:
-            f.write(project_content)
-
-        print("Created ARIA.xcodeproj/project.pbxproj")
-        PYEOF
+\t};
+\trootObject = ${uuid13} /* Project object */;
+}
+PBXEOF
         
     - name: Build iOS App
       run: |
         cd ios
         
-        # Verify project structure
-        echo "Project structure:"
-        ls -la
-        ls -la ARIA/
-        
-        # Build
+        echo "Building ARIA..."
         xcodebuild -project ARIA.xcodeproj \
           -scheme ARIA \
           -configuration Release \
@@ -463,15 +426,15 @@ struct ContentView: View {
         cd ios
         
         if [ -d "build/ARIA.xcarchive/Products/Applications/ARIA.app" ]; then
-          echo "Archive found, creating IPA..."
+          echo "Creating IPA..."
           mkdir -p Payload
           cp -r build/ARIA.xcarchive/Products/Applications/ARIA.app Payload/
           zip -r ../ARIA.ipa Payload
           cd ..
           ls -lh ARIA.ipa
         else
-          echo "Build failed - checking what we have:"
-          find build -type f -o -type d 2>/dev/null | head -50
+          echo "Build failed - checking contents:"
+          find build -type f 2>/dev/null | head -20
           exit 1
         fi
         
