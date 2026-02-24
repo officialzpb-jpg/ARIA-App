@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-ios:
-    runs-on: macos-latest
+    runs-on: macos-13
     
     steps:
     - name: Checkout repository
@@ -16,15 +16,18 @@ jobs:
     - name: Setup Xcode
       uses: maxim-lobanov/setup-xcode@v1
       with:
-        xcode-version: '15.0'
+        xcode-version: latest-stable
+        
+    - name: Show Xcode version
+      run: xcodebuild -version
         
     - name: Create ARIA iOS Project
       run: |
-        mkdir -p ARIA-iOS/ARIA
+        mkdir -p ARIA-iOS/ARIA/Assets.xcassets/AppIcon.appiconset
         cd ARIA-iOS
         
         # Create a simple, working App.swift
-        cat > ARIA/App.swift << 'EOF'
+        cat > ARIA/App.swift << 'SWIFTEOF'
         import SwiftUI
         import AVFoundation
         import Speech
@@ -49,7 +52,6 @@ jobs:
             var body: some View {
                 NavigationView {
                     VStack(spacing: 25) {
-                        // Header
                         VStack(spacing: 10) {
                             Image(systemName: "waveform.circle.fill")
                                 .font(.system(size: 70))
@@ -67,7 +69,6 @@ jobs:
                         
                         Spacer()
                         
-                        // Recording Button
                         Button(action: toggleRecording) {
                             ZStack {
                                 Circle()
@@ -85,7 +86,6 @@ jobs:
                             .font(.headline)
                             .foregroundColor(.secondary)
                         
-                        // Persona Selector
                         VStack(alignment: .leading) {
                             Text("Persona")
                                 .font(.caption)
@@ -94,7 +94,7 @@ jobs:
                             
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack(spacing: 10) {
-                                    ForEach(0..<personas.count, id: \.self) { index in
+                                    ForEach(0..<personas.count, id: \\.self) { index in
                                         Button(action: { selectedPersona = index }) {
                                             Text(personas[index])
                                                 .font(.subheadline)
@@ -112,7 +112,6 @@ jobs:
                         
                         Spacer()
                         
-                        // Display Area
                         ScrollView {
                             VStack(spacing: 15) {
                                 if !transcript.isEmpty {
@@ -148,7 +147,6 @@ jobs:
                         
                         Spacer()
                         
-                        // Settings Link
                         NavigationLink(destination: SettingsView()) {
                             HStack {
                                 Image(systemName: "gear")
@@ -170,15 +168,13 @@ jobs:
                 isRecording.toggle()
                 
                 if isRecording {
-                    // Request permissions and start
                     requestPermissions()
                     transcript = ""
                     response = ""
                 } else {
-                    // Stop and simulate response
                     transcript = "Hello ARIA, what can you do?"
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                        response = "I'm ARIA, your AI Routing & Integration Assistant. I can process voice commands, connect to AI models, and route responses to various platforms like Telegram, Discord, and more. Connect me to your backend for full functionality!"
+                        response = "I'm ARIA, your AI Routing & Integration Assistant. I can process voice commands, connect to AI models, and route responses to various platforms. Connect me to your backend for full functionality!"
                     }
                 }
             }
@@ -230,42 +226,43 @@ jobs:
                 }
             }
         }
-        EOF
+        SWIFTEOF
         
         # Create Assets
-        mkdir -p ARIA/Assets.xcassets/AppIcon.appiconset
-        cat > ARIA/Assets.xcassets/AppIcon.appiconset/Contents.json << 'EOF'
+        cat > ARIA/Assets.xcassets/AppIcon.appiconset/Contents.json << 'JSONEOF'
         {"images":[{"idiom":"universal","platform":"ios","size":"1024x1024"}],"info":{"author":"xcode","version":1}}
-        EOF
+        JSONEOF
         
     - name: Create Xcode Project
       run: |
         cd ARIA-iOS
         mkdir -p ARIA.xcodeproj
         
-        # Create a minimal but valid project.pbxproj
-        cat > ARIA.xcodeproj/project.pbxproj <> 'PROJEOF'
-        // !$*UTF8*$!
+        # Create project.pbxproj - using a heredoc with different delimiter
+        python3 << 'PYEOF'
+        import json
+        
+        project_content = '''// !$*UTF8*$!
         {
         	archiveVersion = 1;
         	classes = {
         	};
         	objectVersion = 56;
         	objects = {
-        
+
         /* Begin PBXBuildFile section */
-        		A1B2C3D4E5F6789012345678 /* App.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6789012345670 /* App.swift */; };
-        		A1B2C3D4E5F6789012345679 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6789012345671 /* Assets.xcassets */; };
+        		A1B2C3D40000000000000001 /* App.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40000000000000000 /* App.swift */; };
+        		A1B2C3D40000000000000003 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40000000000000002 /* Assets.xcassets */; };
         /* End PBXBuildFile section */
 
         /* Begin PBXFileReference section */
-        		A1B2C3D4E5F6789012345660 /* ARIA.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ARIA.app; sourceTree = BUILT_PRODUCTS_DIR; };
-        		A1B2C3D4E5F6789012345670 /* App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App.swift; sourceTree = "<group>"; };
-        		A1B2C3D4E5F6789012345671 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+        		A1B2C3D40000000000000010 /* ARIA.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ARIA.app; sourceTree = BUILT_PRODUCTS_DIR; };
+        		A1B2C3D40000000000000000 /* App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App.swift; sourceTree = "<group>"; };
+        		A1B2C3D40000000000000002 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
         /* End PBXFileReference section */
 
         /* Begin PBXFrameworksBuildPhase section */
-        		A1B2C3D4E5F6789012345655 /* Frameworks */ = {
+        		A1B2C3D40000000000000020 /* Frameworks */ = {
         			isa = PBXFrameworksBuildPhase;
         			buildActionMask = 2147483647;
         			files = (
@@ -275,27 +272,27 @@ jobs:
         /* End PBXFrameworksBuildPhase section */
 
         /* Begin PBXGroup section */
-        		A1B2C3D4E5F6789012345650 = {
+        		A1B2C3D40000000000000030 = {
         			isa = PBXGroup;
         			children = (
-        				A1B2C3D4E5F6789012345665 /* ARIA */,
-        				A1B2C3D4E5F6789012345661 /* Products */,
+        				A1B2C3D40000000000000040 /* ARIA */,
+        				A1B2C3D40000000000000031 /* Products */,
         			);
         			sourceTree = "<group>";
         		};
-        		A1B2C3D4E5F6789012345661 /* Products */ = {
+        		A1B2C3D40000000000000031 /* Products */ = {
         			isa = PBXGroup;
         			children = (
-        				A1B2C3D4E5F6789012345660 /* ARIA.app */,
+        				A1B2C3D40000000000000010 /* ARIA.app */,
         			);
         			name = Products;
         			sourceTree = "<group>";
         		};
-        		A1B2C3D4E5F6789012345665 /* ARIA */ = {
+        		A1B2C3D40000000000000040 /* ARIA */ = {
         			isa = PBXGroup;
         			children = (
-        				A1B2C3D4E5F6789012345670 /* App.swift */,
-        				A1B2C3D4E5F6789012345671 /* Assets.xcassets */,
+        				A1B2C3D40000000000000000 /* App.swift */,
+        				A1B2C3D40000000000000002 /* Assets.xcassets */,
         			);
         			path = ARIA;
         			sourceTree = "<group>";
@@ -303,13 +300,13 @@ jobs:
         /* End PBXGroup section */
 
         /* Begin PBXNativeTarget section */
-        		A1B2C3D4E5F678901234565F /* ARIA */ = {
+        		A1B2C3D40000000000000050 /* ARIA */ = {
         			isa = PBXNativeTarget;
-        			buildConfigurationList = A1B2C3D4E5F6789012345680 /* Build configuration list for PBXNativeTarget "ARIA" */;
+        			buildConfigurationList = A1B2C3D40000000000000060 /* Build configuration list for PBXNativeTarget "ARIA" */;
         			buildPhases = (
-        				A1B2C3D4E5F6789012345654 /* Sources */,
-        				A1B2C3D4E5F6789012345655 /* Frameworks */,
-        				A1B2C3D4E5F6789012345656 /* Resources */,
+        				A1B2C3D40000000000000051 /* Sources */,
+        				A1B2C3D40000000000000020 /* Frameworks */,
+        				A1B2C3D40000000000000052 /* Resources */,
         			);
         			buildRules = (
         			);
@@ -317,15 +314,15 @@ jobs:
         			);
         			name = ARIA;
         			productName = ARIA;
-        			productReference = A1B2C3D4E5F6789012345660 /* ARIA.app */;
+        			productReference = A1B2C3D40000000000000010 /* ARIA.app */;
         			productType = "com.apple.product-type.application";
         		};
         /* End PBXNativeTarget section */
 
         /* Begin PBXProject section */
-        		A1B2C3D4E5F6789012345651 /* Project object */ = {
+        		A1B2C3D40000000000000070 /* Project object */ = {
         			isa = PBXProject;
-        			buildConfigurationList = A1B2C3D4E5F6789012345652 /* Build configuration list for PBXProject "ARIA" */;
+        			buildConfigurationList = A1B2C3D40000000000000071 /* Build configuration list for PBXProject "ARIA" */;
         			compatibilityVersion = "Xcode 14.0";
         			developmentRegion = en;
         			hasScannedForEncodings = 0;
@@ -333,40 +330,40 @@ jobs:
         				en,
         				Base,
         			);
-        			mainGroup = A1B2C3D4E5F6789012345650;
-        			productRefGroup = A1B2C3D4E5F6789012345661 /* Products */;
+        			mainGroup = A1B2C3D40000000000000030;
+        			productRefGroup = A1B2C3D40000000000000031 /* Products */;
         			projectDirPath = "";
         			projectRoot = "";
         			targets = (
-        				A1B2C3D4E5F678901234565F /* ARIA */,
+        				A1B2C3D40000000000000050 /* ARIA */,
         			);
         		};
         /* End PBXProject section */
 
         /* Begin PBXResourcesBuildPhase section */
-        		A1B2C3D4E5F6789012345656 /* Resources */ = {
+        		A1B2C3D40000000000000052 /* Resources */ = {
         			isa = PBXResourcesBuildPhase;
         			buildActionMask = 2147483647;
         			files = (
-        				A1B2C3D4E5F6789012345679 /* Assets.xcassets in Resources */,
+        				A1B2C3D40000000000000003 /* Assets.xcassets in Resources */,
         			);
         			runOnlyForDeploymentPostprocessing = 0;
         		};
         /* End PBXResourcesBuildPhase section */
 
         /* Begin PBXSourcesBuildPhase section */
-        		A1B2C3D4E5F6789012345654 /* Sources */ = {
+        		A1B2C3D40000000000000051 /* Sources */ = {
         			isa = PBXSourcesBuildPhase;
         			buildActionMask = 2147483647;
         			files = (
-        				A1B2C3D4E5F6789012345678 /* App.swift in Sources */,
+        				A1B2C3D40000000000000001 /* App.swift in Sources */,
         			);
         			runOnlyForDeploymentPostprocessing = 0;
         		};
         /* End PBXSourcesBuildPhase section */
 
         /* Begin XCBuildConfiguration section */
-        		A1B2C3D4E5F6789012345672 /* Debug */ = {
+        		A1B2C3D40000000000000080 /* Debug */ = {
         			isa = XCBuildConfiguration;
         			buildSettings = {
         				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -395,7 +392,7 @@ jobs:
         			};
         			name = Debug;
         	};
-        		A1B2C3D4E5F6789012345673 /* Release */ = {
+        		A1B2C3D40000000000000081 /* Release */ = {
         			isa = XCBuildConfiguration;
         			buildSettings = {
         				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -418,7 +415,7 @@ jobs:
         			};
         			name = Release;
         	};
-        		A1B2C3D4E5F6789012345681 /* Debug */ = {
+        		A1B2C3D40000000000000090 /* Debug */ = {
         			isa = XCBuildConfiguration;
         			buildSettings = {
         				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -445,7 +442,7 @@ jobs:
         			};
         			name = Debug;
         	};
-        		A1B2C3D4E5F6789012345682 /* Release */ = {
+        		A1B2C3D40000000000000091 /* Release */ = {
         			isa = XCBuildConfiguration;
         			buildSettings = {
         				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -475,33 +472,42 @@ jobs:
         /* End XCBuildConfiguration section */
 
         /* Begin XCConfigurationList section */
-        		A1B2C3D4E5F6789012345652 /* Build configuration list for PBXProject "ARIA" */ = {
+        		A1B2C3D40000000000000071 /* Build configuration list for PBXProject "ARIA" */ = {
         			isa = XCConfigurationList;
         			buildConfigurations = (
-        				A1B2C3D4E5F6789012345672 /* Debug */,
-        				A1B2C3D4E5F6789012345673 /* Release */,
+        				A1B2C3D40000000000000080 /* Debug */,
+        				A1B2C3D40000000000000081 /* Release */,
         			);
         			defaultConfigurationIsVisible = 0;
         			defaultConfigurationName = Release;
         		};
-        		A1B2C3D4E5F6789012345680 /* Build configuration list for PBXNativeTarget "ARIA" */ = {
+        		A1B2C3D40000000000000060 /* Build configuration list for PBXNativeTarget "ARIA" */ = {
         			isa = XCConfigurationList;
         			buildConfigurations = (
-        				A1B2C3D4E5F6789012345681 /* Debug */,
-        				A1B2C3D4E5F6789012345682 /* Release */,
+        				A1B2C3D40000000000000090 /* Debug */,
+        				A1B2C3D40000000000000091 /* Release */,
         			);
         			defaultConfigurationIsVisible = 0;
         			defaultConfigurationName = Release;
         		};
         /* End XCConfigurationList section */
         	};
-        	rootObject = A1B2C3D4E5F6789012345651 /* Project object */;
+        	rootObject = A1B2C3D40000000000000070 /* Project object */;
         }
-        PROJEOF
+        '''
+        
+        with open('ARIA.xcodeproj/project.pbxproj', 'w') as f:
+            f.write(project_content)
+        
+        print("Created project.pbxproj")
+        PYEOF
         
     - name: Build iOS App
       run: |
         cd ARIA-iOS
+        
+        # Verify files exist
+        ls -la ARIA/
         
         # Build the app
         xcodebuild -project ARIA.xcodeproj \
@@ -512,8 +518,7 @@ jobs:
           archive \
           CODE_SIGNING_ALLOWED=NO \
           CODE_SIGNING_REQUIRED=NO \
-          CODE_SIGN_IDENTITY="" \
-          | tee build.log
+          CODE_SIGN_IDENTITY=""
           
     - name: Create IPA
       run: |
@@ -529,8 +534,8 @@ jobs:
           ls -lh ARIA.ipa
         else
           echo "Build failed - archive not found"
-          echo "Build log:"
-          cat build.log | tail -100
+          echo "Contents of build directory:"
+          find build -type f 2>/dev/null || echo "No build directory"
           exit 1
         fi
         
@@ -541,11 +546,3 @@ jobs:
         name: ARIA-iOS-IPA
         path: ARIA-iOS/ARIA.ipa
         retention-days: 30
-        
-    - name: Upload Build Logs on Failure
-      uses: actions/upload-artifact@v4
-      if: failure()
-      with:
-        name: build-logs
-        path: ARIA-iOS/build.log
-        retention-days: 7
